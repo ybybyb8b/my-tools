@@ -1,0 +1,64 @@
+{
+  "solo": {
+    "takeout": [
+      { "item": "螺蛳粉", "weight": 5 },
+      { "item": "麻辣烫", "weight": 4 },
+      { "item": "轻食沙拉", "weight": 2 },
+      { "item": "日式拉面", "weight": 3 }
+    ],
+    "cookTypes": [
+      { "type": "速食", "weight": 10 },
+      { "type": "方便菜", "weight": 5 },
+      { "type": "炒菜", "weight": 2 }
+    ]
+  },
+  "shared": {
+    "takeout": [
+      { "item": "东北饺子", "weight": 5 },
+      { "item": "必胜客", "weight": 3 },
+      { "item": "麦当劳", "weight": 3 },
+      { "item": "潮汕牛肉火锅", "weight": 2 },
+      { "item": "家常菜馆", "weight": 4 }
+    ],
+    "cookTypes": [
+      { "type": "炒菜", "weight": 5 },
+      { "type": "水煮菜", "weight": 3 },
+      { "type": "火锅", "weight": 2 },
+      { "type": "焖菜", "weight": 3 }
+    ]
+  },
+  "pools": {
+    "huncai": ["肥牛卷", "羊肉卷", "大虾", "午餐肉", "鱼片", "肉丸"],
+    "sucai": ["土豆片", "金针菇", "冻豆腐", "海带结", "宽粉", "藕片", "腐竹", "冬瓜", "香菇", "木耳"],
+    "yecai": ["生菜", "娃娃菜", "油麦菜", "菠菜", "茼蒿"],
+    "zhuchao": [
+      { "item": "青椒肉丝", "weight": 5 },
+      { "item": "番茄炒蛋", "weight": 4 },
+      { "item": "宫保鸡丁", "weight": 3 },
+      { "item": "回锅肉", "weight": 3 },
+      { "item": "小炒黄牛肉", "weight": 2 }
+    ],
+    "fuchao": [
+      { "item": "蒜蓉时蔬", "weight": 5 },
+      { "item": "手撕包菜", "weight": 4 },
+      { "item": "凉拌黄瓜", "weight": 3 },
+      { "item": "酸辣土豆丝", "weight": 3 }
+    ],
+    "mencai": [
+      { "item": "土豆排骨焖饭", "weight": 5 },
+      { "item": "豆角焖面", "weight": 4 },
+      { "item": "黄焖鸡", "weight": 3 },
+      { "item": "排骨炖粉条", "weight": 3 }
+    ],
+    "sushi": [
+      { "item": "冷冻水饺", "weight": 5 },
+      { "item": "葱油拌面", "weight": 4 },
+      { "item": "螺蛳粉(自煮)", "weight": 3 },
+      { "item": "韩式火鸡面", "weight": 2 }
+    ],
+    "fangbiancai": [
+      { "item": "宫保鸡丁(半成品)", "weight": 1 },
+      { "item": "小酥肉(空气炸锅)", "weight": 1 }
+    ]
+  }
+}
