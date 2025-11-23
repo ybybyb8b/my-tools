@@ -12,20 +12,20 @@
   {"type":"主荤", "name":"养身萝卜焖牛腩", "price":68.8, "mutex":"牛腩", "size": "M"},
   {"type":"主荤", "name":"烫烫烫毛血旺", "price":68.8, "mutex":"血旺", "size": "L"},
   {"type":"主荤", "name":"黄焖麻鸭", "price":68.8, "mutex":"鸭", "size": "M"},
-  {"type":"主荤", "name":"小炒黄牛肉", "price":62.8, "mutex":"牛肉", "size": "L"},
-  {"type":"主荤", "name":"火爆腰花", "price":59.8,"mutex":"内脏", "size": "L"},
+  {"type":"主荤", "name":"小炒黄牛肉", "price":62.8, "mutex":"牛肉", "size": "M"},
+  {"type":"主荤", "name":"火爆腰花", "price":59.8,"mutex":"内脏", "size": "M"},
   {"type":"主荤", "name":"蒜苗回锅肉", "price":58.8, "mutex":"回锅肉", "size": "M"},
   {"type":"主荤", "name":"酸菜鲜切吊龙", "price":58.8, "mutex":"牛肉", "size": "L"},
-  {"type":"主荤", "name":"蒜蓉粉丝虾", "price":58.8, "mutex":"虾", "size": "L"},
+  {"type":"主荤", "name":"蒜蓉粉丝虾", "price":58.8, "mutex":"虾", "size": "M"},
   {"type":"主荤", "name":"小煎鲜排骨", "price":58.8, "mutex":"排骨", "size": "M"},
   {"type":"主荤", "name":"金牌蒜香骨", "price":55.8, "mutex":"排骨", "size": "M"},
   {"type":"主荤", "name":"盐菜回锅肉", "price":53.8, "mutex":"回锅肉", "size": "M"},
-  {"type":"辅荤", "name":"百年卤拼（小份）", "price":48.8, "size": "M"},
+  {"type":"辅荤", "name":"百年卤拼（小份）", "price":48.8, "mutex":"腊卤", "size": "M"},
   {"type":"辅荤", "name":"酸菜焗肥肠煲", "price":49.8, "mutex":"肥肠", "size": "M"},
   {"type":"辅荤", "name":"脆皮樟茶鸭", "price":45.8, "mutex":"鸭", "size": "M"},
   {"type":"辅荤", "name":"水煮肉片", "price":45.8, "size": "M"},
   {"type":"辅荤", "name":"五花肉爆牛肝菌", "price":45.8, "size": "M"},
-  {"type":"辅荤", "name":"腊肉拼盘", "price":45.8, "size": "M"},
+  {"type":"辅荤", "name":"腊肉拼盘", "price":45.8, "mutex":"腊卤", "size": "M"},
   {"type":"辅荤", "name":"浇汁小海鲜", "price":36.8, "size": "M"},
   {"type":"辅荤", "name":"十八秒猪肝", "price":36.8,"mutex":"内脏", "size": "M"},
   {"type":"辅荤", "name":"鱼香肉丝", "price":36.8, "size": "M"},
@@ -70,4 +70,5 @@
   {"type":"小吃", "name":"手工拉丝糍粑（10个）", "price":28.8, "size": "S"},
   {"type":"小吃", "name":"炸小酥肉", "price":22.8, "size": "S"}
 ]
+
 
