@@ -11,7 +11,7 @@
     ],
     "cookTypes": [
       { "type": "速食", "weight": 5 },
-      { "type": "方便菜", "weight": 1 },
+      { "type": "方便菜", "weight": 1 }
     ]
   },
   "shared": {
