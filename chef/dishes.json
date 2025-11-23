@@ -43,7 +43,6 @@
   {"type":"凉菜", "name":"糖蒜拌猪肝", "price":29.8,"mutex":"内脏", "size": "M"},
   {"type":"凉菜", "name":"鸡丝凉面", "price":26.8, "size": "M"},
   {"type":"凉菜", "name":"烧椒皮蛋", "price":25.8, "size": "M"},
-  {"type":"凉菜", "name":"麻酱凤尾", "price":18.8, "size": "M"},
   {"type":"凉菜", "name":"风味小拌菜", "price":18.8, "size": "M"},
   {"type":"凉菜", "name":"酸辣木耳", "price":18.8, "size": "S"},
   {"type":"凉菜", "name":"口口脆瓜", "price":16.8, "size": "S"},
@@ -70,6 +69,7 @@
   {"type":"小吃", "name":"手工拉丝糍粑（10个）", "price":28.8, "size": "S"},
   {"type":"小吃", "name":"炸小酥肉", "price":22.8, "size": "S"}
 ]
+
 
 
 
