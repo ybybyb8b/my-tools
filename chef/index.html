@@ -180,7 +180,7 @@
             // 自动计算分量 (保留之前的逻辑)
             db = raw.map(d => ({
                 ...d, 
-                size: autoSize(d.name), 
+                size: d.size || autoSize(d.name), 
                 mutex: d.mutex || ""
             }));
 
@@ -344,3 +344,4 @@
 </script>
 </body>
 </html>
+
