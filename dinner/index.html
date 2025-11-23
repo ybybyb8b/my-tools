@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>今天吃什么</title>
+    <style>
+        /* --- iOS App 风格设计系统 --- */
+        :root {
+            --primary: #007AFF; /* iOS Blue */
+            --accent: #FF9500;  /* iOS Orange */
+            --bg: #F2F2F7;      /* iOS System Gray 6 */
+            --card: #FFFFFF;
+            --text-main: #000000;
+            --text-sub: #8E8E93;
+            --shadow: 0 8px 30px rgba(0,0,0,0.06);
+            --radius: 20px;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 顶部导航栏 */
+        .nav-bar {
+            padding: calc(var(--safe-top) + 20px) 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .nav-sub { font-size: 14px; color: var(--text-sub); }
+
+        /* 主容器 */
+        .app-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* --- 步骤页面通用样式 --- */
+        .step-view {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 0 20px 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0;
+            transform: translateX(50px);
+            pointer-events: none;
+        }
+
+        .step-view.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+        }
+        
+        .step-view.prev {
+            opacity: 0;
+            transform: translateX(-50px);
+            pointer-events: none;
+        }
+
+        .step-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            margin-top: 10px;
+            color: var(--text-main);
+        }
+
+        /* 选项大卡片 */
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .choice-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .choice-card:active { transform: scale(0.96); background: #E5E5EA; }
+
+        .c-icon { font-size: 36px; }
+        .c-info h3 { margin: 0; font-size: 18px; margin-bottom: 4px; font-weight: 600; }
+        .c-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
+
+        /* --- 结果页布局 --- */
+        .result-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            padding-bottom: 40px;
+        }
+
+        .mode-pill {
+            align-self: center;
+            background: #E5E5EA;
+            color: #8E8E93;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .dishes-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dish-card {
+            background: var(--card);
+            border-radius: 22px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+            transition: all 0.3s ease;
+        }
+        
+        .dish-card.primary {
+            min-height: 140px;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .dish-card.primary .dish-name {
+            font-size: 28px;
+            font-weight: 800;
+            color: #000;
+            line-height: 1.2;
+        }
+        .dish-card.primary .dish-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .dish-card.secondary {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 15px 20px;
+            min-height: auto;
+            backdrop-filter: blur(10px);
+        }
+        .dish-card.secondary .dish-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        .dish-card.secondary .dish-desc {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-top: 4px;
+        }
+
+        /* 底部操作栏 */
+        .action-bar {
+            display: flex;
+            gap: 15px;
+            margin-top: auto;
+            padding-bottom: var(--safe-bottom);
+        }
+        .btn {
+            flex: 1;
+            padding: 18px;
+            border-radius: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-sec { background: #E5E5EA; color: #000; }
+        .btn-pri { background: var(--primary); color: #fff; box-shadow: 0 8px 20px rgba(0,122,255,0.25); }
+
+        .back-btn {
+            position: absolute;
+            top: 15px; left: 10px;
+            padding: 10px;
+            font-size: 24px;
+            color: var(--text-sub);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white;
+            padding: 10px 20px; border-radius: 50px;
+            font-size: 14px; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast" id="toast">✅ 已记录到历史</div>
+
+    <div class="nav-bar">
+        <div>
+            <div class="nav-sub">Dinner Decider</div>
+            <div class="nav-title">今天吃什么</div>
+        </div>
+        <div class="nav-sub" id="db-status" style="font-size: 12px;">连接中...</div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- STEP 1: 用餐情景 -->
+        <div class="step-view active" id="step-1">
+            <div class="step-header">👋 嘿，今天几个人吃？</div>
+            <div class="choice-grid">
+                <div class="choice-card" onclick="selectContext('shared')">
+                    <div class="c-icon">👫</div>
+                    <div class="c-info">
+                        <h3>二人食</h3>
+                        <p>和老公一起吃，口味折中</p>
+                    </div>
+                </div>
+                <div class="choice-card" onclick="selectContext('solo')">
+                    <div class="c-icon">💃</div>
+                    <div class="c-info">
+                        <h3>自己独享</h3>
+                        <p>放飞自我，吃点特别的</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: 模式选择 -->
+        <div class="step-view" id="step-2">
+            <div class="back-btn" onclick="goToStep(1)">‹</div>
+            <div class="step-header" style="margin-left: 30px;">🤔 咱们怎么解决？</div>
+            <div class="choice-grid">
+                <div class="choice-card" onclick="selectMode('takeout')">
+                    <div class="c-icon">🛵</div>
+                    <div class="c-info">
+                        <h3>点外卖</h3>
+                        <p>不想动，送上门</p>
+                    </div>
+                </div>
+                <div class="choice-card" onclick="selectMode('cook')">
+                    <div class="c-icon">👨‍🍳</div>
+                    <div class="c-info">
+                        <h3>自己煮</h3>
+                        <p>展现厨艺的时候到了</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: 结果展示 -->
+        <div class="step-view" id="step-3">
+            <div class="back-btn" onclick="goToStep(2)">‹</div>
+            <div class="result-container" id="result-inject-area">
+                <!-- Javascript will populate this -->
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-sec" onclick="reRoll()">❌ 换一个</button>
+                <button class="btn btn-pri" onclick="confirmChoice()">✅ 就吃这个</button>
+            </div>
+        </div>
+
+    </div>
+
+<script>
+    let MENUS = {}; // 数据将从 JSON 加载
+
+    /* ================= 状态管理 ================= */
+    let STATE = {
+        context: null, // 'shared' or 'solo'
+        mode: null,    // 'takeout' or 'cook'
+        currentResult: null
+    };
+    
+    const HIST_KEY = "dinner_app_history";
+
+    /* ================= 初始化与数据加载 ================= */
+    async function initData() {
+        try {
+            // 使用时间戳防止缓存
+            const response = await fetch('menu_data.json?t=' + new Date().getTime());
+            if (!response.ok) throw new Error("File Read Error");
+            MENUS = await response.json();
+            
+            document.getElementById('db-status').textContent = "Ready";
+            document.getElementById('db-status').style.color = "#34C759";
+        } catch (e) {
+            document.getElementById('db-status').textContent = "❌ Offline";
+            console.error(e);
+            alert("无法读取菜单数据，请检查 menu_data.json 文件是否存在。");
+        }
+    }
+
+    /* ================= 导航逻辑 ================= */
+    function goToStep(stepNum) {
+        document.querySelectorAll('.step-view').forEach(el => {
+            el.classList.remove('active', 'prev');
+        });
+        for(let i=1; i<stepNum; i++) {
+            document.getElementById(`step-${i}`).classList.add('prev');
+        }
+        document.getElementById(`step-${stepNum}`).classList.add('active');
+    }
+
+    function selectContext(val) { STATE.context = val; goToStep(2); }
+    function selectMode(val) { STATE.mode = val; generateResult(); goToStep(3); }
+
+    function reRoll() {
+        const area = document.getElementById('result-inject-area');
+        area.style.opacity = 0.5;
+        area.style.transform = "scale(0.98)";
+        setTimeout(() => {
+            generateResult();
+            area.style.opacity = 1;
+            area.style.transform = "scale(1)";
+        }, 200);
+    }
+
+    /* ================= 核心决策算法 ================= */
+    function getHistory() {
+        const h = localStorage.getItem(HIST_KEY);
+        return h ? JSON.parse(h) : [];
+    }
+    
+    function isRecent(name) {
+        const hist = getHistory();
+        const now = new Date().getTime();
+        const threeDays = 3 * 24 * 60 * 60 * 1000;
+        const recent = hist.filter(r => (now - r.date) < threeDays);
+        return recent.some(r => r.item === name);
+    }
+
+    function weightedRandom(list) {
+        if (!list || list.length === 0) return { item: "无数据", type: "无数据" };
+        let totalWeight = list.reduce((sum, item) => sum + item.weight, 0);
+        let random = Math.random() * totalWeight;
+        for (let i = 0; i < list.length; i++) {
+            if (random < list[i].weight) return list[i];
+            random -= list[i].weight;
+        }
+        return list[0];
+    }
+
+    function multiRandomUnique(list, count) {
+        if (!list) return [];
+        let shuffled = [...list].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    /* ================= 渲染结果 ================= */
+    function generateResult() {
+        const { context, mode } = STATE;
+        const pools = MENUS.pools || {};
+        const container = document.getElementById('result-inject-area');
+        container.innerHTML = ''; 
+
+        let mainItemName = "";
+        let headerText = "";
+        let headerIcon = "";
+        let contentHTML = "";
+
+        if (mode === 'takeout') {
+            headerIcon = "🛵";
+            headerText = "外卖模式 · " + (context==='shared'?'双人':'独享');
+            
+            const list = MENUS[context].takeout;
+            let choice = weightedRandom(list);
+            for(let k=0; k<5; k++) {
+                if(!isRecent(choice.item)) break;
+                choice = weightedRandom(list);
+            }
+            mainItemName = choice.item;
+
+            contentHTML = `
+                <div class="dish-card primary">
+                    <div class="dish-icon">🥡</div>
+                    <div class="dish-name">${choice.item}</div>
+                </div>
+            `;
+
+        } else {
+            const typeList = MENUS[context].cookTypes;
+            const cookTypeObj = weightedRandom(typeList);
+            const cookType = cookTypeObj.type;
+            
+            headerIcon = "👨‍🍳";
+            headerText = "自己做 · " + cookType;
+
+            if (cookType === '火锅' || cookType === '水煮菜') {
+                let meat = multiRandomUnique(pools.huncai, 1)[0];
+                for(let k=0; k<5; k++) {
+                    if(!isRecent(meat)) break;
+                    meat = multiRandomUnique(pools.huncai, 1)[0];
+                }
+                const veggies = multiRandomUnique(pools.sucai, 3).join('、');
+                const leaf = multiRandomUnique(pools.yecai, 1)[0];
+
+                mainItemName = meat;
+                contentHTML = `
+                    <div class="dish-card primary">
+                        <div class="dish-icon">🥩</div>
+                        <div class="dish-name">${meat}</div>
+                    </div>
+                    <div class="dish-card secondary">
+                        <div class="dish-name" style="font-size: 16px;">🥬 配菜清单</div>
+                        <div class="dish-desc">${leaf}、${veggies}</div>
+                    </div>
+                `;
+
+            } else if (cookType === '炒菜') {
+                const main = weightedRandom(pools.zhuchao).item;
+                const side = weightedRandom(pools.fuchao).item;
+                mainItemName = main;
+
+                contentHTML = `
+                    <div class="dish-card primary" style="min-height: 110px;">
+                        <div class="dish-name">${main}</div>
+                    </div>
+                    <div class="dish-card primary" style="min-height: 110px; opacity: 0.9;">
+                        <div class="dish-name">${side}</div>
+                    </div>
+                `;
+
+            } else {
+                let poolName = cookType === '焖菜' ? 'mencai' : (cookType === '速食' ? 'sushi' : 'fangbiancai');
+                const dish = weightedRandom(pools[poolName]).item;
+                mainItemName = dish;
+                
+                let icon = cookType === '焖菜' ? '🍛' : '🍜';
+                contentHTML = `
+                    <div class="dish-card primary">
+                        <div class="dish-icon">${icon}</div>
+                        <div class="dish-name">${dish}</div>
+                    </div>
+                `;
+            }
+        }
+        
+        STATE.currentResult = mainItemName;
+
+        container.innerHTML = `
+            <div class="mode-pill">${headerIcon} ${headerText}</div>
+            <div class="dishes-wrapper">
+                ${contentHTML}
+            </div>
+        `;
+    }
+
+    function confirmChoice() {
+        if (!STATE.currentResult) return;
+        const hist = getHistory();
+        hist.unshift({ date: new Date().getTime(), item: STATE.currentResult, mode: STATE.mode });
+        if(hist.length > 20) hist.pop();
+        localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+        
+        const toast = document.getElementById('toast');
+        toast.style.opacity = 1;
+        setTimeout(() => toast.style.opacity = 0, 2000);
+        setTimeout(() => goToStep(1), 1000);
+    }
+
+    initData();
+</script>
+</body>
+</html>
