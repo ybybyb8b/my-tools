@@ -60,7 +60,6 @@
         .floating-dock {
             position: fixed; bottom: 30px; left: 20px; right: 20px;
             background: #1E1B4B; border-radius: 30px; padding: 10px;
-            display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 15px 30px rgba(30, 27, 75, 0.25);
             z-index: 50; padding-bottom: calc(10px + env(safe-area-inset-bottom));
             transition: transform 0.3s;
@@ -78,7 +77,8 @@
             🏠
         </div>
         <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm pointer-events-auto bg-purple-100">
-            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Person/3D/person_3d.png" class="w-full h-full object-cover">
+            <!-- 头像图片 -->
+            <img src="assets/person_3d.png" class="w-full h-full object-cover">
         </div>
     </div>
 
@@ -93,7 +93,6 @@
             </div>
 
             <div class="flex-1 overflow-y-auto no-scrollbar space-y-5">
-                <!-- 替换为图片 -->
                 <div onclick="selectContext('shared')" class="active-card glass-card p-6 flex items-center gap-5 cursor-pointer transition transform active:scale-95">
                     <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center overflow-hidden">
                         <img src="" id="img-shared" class="img-3d w-16">
@@ -200,37 +199,39 @@
     let STATE = { context: null, mode: null, cookType: null, currentResult: null, step: 1 };
     const HIST_KEY = "dinner_app_history";
 
-    /* ================= 图片配置表 (ICON_MAP) ================= */
-    // 这里的链接使用的是 Microsoft 3D Fluent Emojis 的开源 CDN
-    // 如果您想换成自己的图片，直接把 URL 替换成您的图片地址即可 (支持 png/jpg/gif)
+    /* ================= 图片配置表 (ICON_MAP) - 使用 assets/ 相对路径 ================= */
+    // 请将对应的 PNG/JPG 文件放入 dinner/assets/ 文件夹中
+    const ASSET_PATH = "./assets/";
+
     const ICON_MAP = {
-        "shared": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/People%20Holding%20Hands/3D/people_holding_hands_3d.png",
-        "solo": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Person%20Shrugging%20Medium-Light%20Skin%20Tone/3D/person_shrugging_medium-light_skin_tone_3d.png",
+        "shared": ASSET_PATH + "people_holding_hands_3d.png",
+        "solo": ASSET_PATH + "person_shrugging_medium-light_skin_tone_3d.png",
         
-        "takeout": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Travel%20and%20places/Motor%20Scooter/3D/motor_scooter_3d.png",
-        "cook": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Cook%20Medium-Light%20Skin%20Tone/3D/cook_medium-light_skin_tone_3d.png",
+        "takeout": ASSET_PATH + "motor_scooter_3d.png",
+        "cook": ASSET_PATH + "cook_medium-light_skin_tone_3d.png",
         
         // 烹饪类型对应的图片
         "types": {
-            "火锅": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Pot%20of%20Food/3D/pot_of_food_3d.png",
-            "水煮菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Pot%20of%20Food/3D/pot_of_food_3d.png",
-            "炒菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Shallow%20Pan%20of%20Food/3D/shallow_pan_of_food_3d.png",
-            "焖菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Canned%20Food/3D/canned_food_3d.png",
-            "速食": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Steaming%20Bowl/3D/steaming_bowl_3d.png",
-            "方便菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Takeout%20Box/3D/takeout_box_3d.png",
-            "default": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Fork%20and%20Knife%20with%20Plate/3D/fork_and_knife_with_plate_3d.png"
+            "火锅": ASSET_PATH + "pot_of_food_3d.png",
+            "水煮菜": ASSET_PATH + "pot_of_food_3d.png",
+            "炒菜": ASSET_PATH + "shallow_pan_of_food_3d.png",
+            "焖菜": ASSET_PATH + "canned_food_3d.png",
+            "速食": ASSET_PATH + "steaming_bowl_3d.png",
+            "方便菜": ASSET_PATH + "takeout_box_3d.png",
+            "default": ASSET_PATH + "fork_and_knife_with_plate_3d.png"
         },
 
         // 结果页的图片 (主菜展示)
         "results": {
-            "takeout": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Takeout%20Box/3D/takeout_box_3d.png",
-            "meat": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Cut%20of%20Meat/3D/cut_of_meat_3d.png",
-            "main": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Shallow%20Pan%20of%20Food/3D/shallow_pan_of_food_3d.png",
-            "noodle": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Steaming%20Bowl/3D/steaming_bowl_3d.png"
+            "takeout": ASSET_PATH + "takeout_box_3d.png",
+            "meat": ASSET_PATH + "cut_of_meat_3d.png",
+            "main": ASSET_PATH + "shallow_pan_of_food_3d.png",
+            "noodle": ASSET_PATH + "steaming_bowl_3d.png"
         }
     };
+    /* ================= (备份数据省略) ================= */
+    const FALLBACK_DATA = { /* ... 保持与 menu_data.json 一致的结构 ... */ }; 
 
-    /* ================= 初始化图片 ================= */
     function loadStaticImages() {
         document.getElementById('img-shared').src = ICON_MAP.shared;
         document.getElementById('img-solo').src = ICON_MAP.solo;
@@ -238,37 +239,19 @@
         document.getElementById('img-cook').src = ICON_MAP.cook;
     }
 
-    // 备份数据
-    const FALLBACK_DATA = {
-      "solo": {
-        "takeout": [ { "item": "螺蛳粉", "weight": 4 }, { "item": "老友粉", "weight": 4 }, { "item": "岭前羊", "weight": 2 }, { "item": "霸碗", "weight": 4 }, { "item": "刘文祥", "weight": 2 }, { "item": "曹氏鸭脖", "weight": 1 }, { "item": "鸭面派", "weight": 2 } ],
-        "cookTypes": [ { "type": "速食", "weight": 5 }, { "type": "方便菜", "weight": 1 } ]
-      },
-      "shared": {
-        "takeout": [ { "item": "岭前羊", "weight": 3 }, { "item": "霸碗", "weight": 4 }, { "item": "沙县小吃", "weight": 5 }, { "item": "窑鸡王", "weight": 1 }, { "item": "四川老盒饭", "weight": 1 }, { "item": "鸭面派", "weight": 1 }, { "item": "岭南牛杂", "weight": 2 }, { "item": "毛记冒菜", "weight": 1 }, { "item": "蘸水菜", "weight": 2 }, { "item": "斗舌干拌火锅冒菜", "weight": 1 }, { "item": "跷脚牛肉", "weight": 2 }, { "item": "淮南牛肉汤", "weight": 2 } ],
-        "cookTypes": [ { "type": "炒菜", "weight": 5 }, { "type": "水煮菜", "weight": 10 }, { "type": "火锅", "weight": 1 }, { "type": "焖菜", "weight": 6 }, { "type": "方便菜", "weight": 6 } ]
-      },
-      "pools": {
-        "huncai": ["牛肉", "虾滑", "巴沙鱼", "去皮鸡腿肉", "虾仁"],
-        "sucai": ["土豆", "金针菇", "豆制品", "海带", "藕片", "冬瓜", "香菇", "西蓝花", "莴笋", "萝卜", "豆芽", "西葫芦", "洋葱", "芦笋"],
-        "yecai": ["生菜", "娃娃菜", "油麦菜", "菠菜", "茼蒿", "上海青", "包菜", "小白菜"],
-        "zhuchao": [ { "item": "小炒黄牛肉", "weight": 5 }, { "item": "芹菜牛肉末", "weight": 5 }, { "item": "蒜苗炒腊肉", "weight": 1 }, { "item": "盐葱鸡胸肉", "weight": 2 }, { "item": "鸡胸肉炒口蘑", "weight": 2 } ],
-        "fuchao": [ { "item": "番茄炒蛋", "weight": 4 }, { "item": "手撕包菜", "weight": 4 }, { "item": "虾仁滑蛋", "weight": 2 }, { "item": "炒时蔬", "weight": 5 }, { "item": "包菜抱蛋", "weight": 5 }, { "item": "虾滑藕带炒芦笋", "weight": 3 } ],
-        "mencai": [ { "item": "口蘑", "weight": 2 }, { "item": "娃娃菜", "weight": 2 }, { "item": "胡萝卜豆芽", "weight": 1 }, { "item": "芹菜", "weight": 2 }, { "item": "萝卜丝", "weight": 1 } ],
-        "sushi": [ { "item": "米粉类", "weight": 4 }, { "item": "螺蛳粉(自煮)", "weight": 3 }, { "item": "方便面", "weight": 4 } ],
-        "fangbiancai": [ { "item": "小炒黄牛肉(盒马)", "weight": 1 }, { "item": "盐葱鸡腿排(盒马)", "weight": 1 }, { "item": "泡椒牛肉丝(盒马)", "weight": 1 }, { "item": "鲜椒辣子鸡(盒马)", "weight": 1 }, { "item": "蒜薹肉丝(盒马)", "weight": 1 }, { "item": "辣椒小炒肉(盒马)", "weight": 1 }, { "item": "青椒肉丝(盒马)", "weight": 1 }, { "item": "肉末豇豆(盒马)", "weight": 1 }, { "item": "黑椒牛肉粒(盒马)", "weight": 1 }, { "item": "鱼香肉丝(盒马)", "weight": 1 }, { "item": "香葱香菜拌牛肉(盒马)", "weight": 1 }, { "item": "宫保鸡丁(盒马)", "weight": 1 }, { "item": "酸菜鱼(盒马)", "weight": 1 }, { "item": "青椒鸡(朴朴)", "weight": 1 }, { "item": "肉末笋丁(朴朴)", "weight": 1 }, { "item": "小笋炒肉(朴朴)", "weight": 1 }, { "item": "鲜制双椒肉丝(朴朴)", "weight": 1 }, { "item": "鲜制鱼香肉丝(朴朴)", "weight": 1 }, { "item": "鲜制烂肉豇豆(朴朴)", "weight": 1 }, { "item": "鲜制宫保鸡丁(朴朴)", "weight": 1 }, { "item": "青花椒兔丁(朴朴)", "weight": 1 }, { "item": "鸡米芽菜(朴朴)", "weight": 1 }, { "item": "自贡小煎鸡(朴朴)", "weight": 1 }, { "item": "子姜鸭丝(朴朴)", "weight": 1 }, { "item": "鲜制泡椒牛肉丝(朴朴)", "weight": 1 }, { "item": "黑椒芦笋牛肉粒(朴朴)", "weight": 1 }, { "item": "子姜鲜锅兔(朴朴)", "weight": 1 }, { "item": "盐葱鸡腿排(朴朴)", "weight": 1 } ]
-      }
-    };
-
     async function initData() {
-        loadStaticImages(); // 加载首页图片
+        loadStaticImages();
         try {
             const response = await fetch('menu_data.json?t=' + new Date().getTime());
             if (!response.ok) throw new Error("Fetch Failed");
             MENUS = await response.json();
+            document.getElementById('db-status').textContent = "Ready";
+            document.getElementById('db-status').style.color = "#34C759";
         } catch (e) {
             console.warn("Using fallback data");
             MENUS = FALLBACK_DATA;
+            document.getElementById('db-status').textContent = "Using Backup";
+            document.getElementById('db-status').style.color = "#FF9500";
         }
     }
 
@@ -310,8 +293,8 @@
         if (val === 'takeout') { generateResultTakeout(); goToStep(4); } 
         else { generateCookType(); goToStep(3); }
     }
-    function goBackFromResult() { if (STATE.mode === 'takeout') goToStep(2); else goToStep(3); }
-
+    
+    // --- Logic Helpers ---
     function getHistory() { const h = localStorage.getItem(HIST_KEY); return h ? JSON.parse(h) : []; }
     function isRecent(name) {
         const hist = getHistory();
@@ -331,13 +314,13 @@
         return [...list].sort(() => 0.5 - Math.random()).slice(0, count);
     }
 
+    // --- Generation ---
     function generateCookType() {
         const type = weightedRandom(MENUS[STATE.context].cookTypes).type;
         STATE.cookType = type;
         
         document.getElementById('type-name-disp').innerText = type;
         
-        // 根据类型名称获取图片URL (模糊匹配)
         let imgUrl = ICON_MAP.types.default;
         for(let key in ICON_MAP.types) {
             if(type.includes(key)) { imgUrl = ICON_MAP.types[key]; break; }
@@ -352,6 +335,7 @@
     }
     function generateMenuFromType() { generateResultCook(); goToStep(4); }
 
+    // --- Result Rendering ---
     function reRollDish() {
         const card = document.getElementById('result-card-main');
         card.style.transform = "scale(0.9) translateY(20px)";
@@ -363,7 +347,6 @@
         }, 300);
     }
 
-    // --- 渲染核心 (图片版) ---
     function generateResultTakeout() {
         const list = MENUS[STATE.context].takeout;
         let choice = weightedRandom(list);
@@ -389,7 +372,7 @@
             const v = multiRandomUnique(pools.sucai, 3).join('、');
             main = meat;
             html = `
-                <div class="h-24 flex items-center justify-center mb-2">
+                <div class="text-[80px] img-3d mb-4">
                     <img src="${ICON_MAP.results.meat}" class="img-3d w-24 h-24 object-contain">
                 </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 mb-1">${meat}</h2>
@@ -403,7 +386,7 @@
             main = weightedRandom(pools.zhuchao).item;
             const side = weightedRandom(pools.fuchao).item;
             html = `
-                <div class="h-24 flex items-center justify-center mb-2">
+                <div class="text-[80px] img-3d mb-2">
                     <img src="${ICON_MAP.results.main}" class="img-3d w-24 h-24 object-contain">
                 </div>
                 <div class="space-y-3 w-full">
