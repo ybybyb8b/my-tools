@@ -77,16 +77,21 @@
 
     <div class="ambient-light"></div>
 
-    <!-- Header -->
-    <header class="mt-6 mb-8 flex justify-between items-center px-1">
-        <div>
-            <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5 opacity-80">Smart Dining Assistant</div>
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">百年神厨</h1>
-        </div>
+    <!-- 顶部导航栏 (新增：返回主页) -->
+    <div class="flex justify-between items-center mt-4 mb-6">
+        <button onclick="location.href='../index.html'" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition" aria-label="返回主页">
+            🏠
+        </button>
         <div id="status-badge" class="px-3 py-1 rounded-full bg-white/50 border border-gray-200 text-gray-400 text-xs font-medium backdrop-blur-sm">
             Connecting...
         </div>
-    </header>
+    </div>
+
+    <!-- 标题区域 -->
+    <div class="mb-8 px-1">
+        <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1.5 opacity-80">Smart Dining Assistant</div>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">百年神厨</h1>
+    </div>
 
     <!-- 主要操作区 -->
     <div class="soft-card p-6 mb-8">
@@ -145,11 +150,11 @@
         </div>
     </div>
 
-    <!-- 历史记录卡片 (新增) -->
+    <!-- 历史记录卡片 -->
     <div id="history-section" class="hidden mt-8 mb-8 animate-enter" style="animation-delay: 200ms">
         <div class="flex items-center justify-between mb-3 px-2">
             <div class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                <span>已屏蔽 / 历史记录</span>
+                <span>历史订单 / 已屏蔽</span>
                 <span id="hist-count" class="bg-gray-200 text-gray-500 px-1.5 rounded text-[10px]">0</span>
             </div>
             <button onclick="clearHist()" class="text-xs text-red-400 hover:text-red-600 font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-red-50 transition">
@@ -158,10 +163,10 @@
             </button>
         </div>
         <div class="soft-card p-4">
-            <div id="hist-list" class="flex flex-wrap gap-2 text-sm text-gray-500">
-                <!-- 历史标签 -->
+            <div id="hist-timeline" class="space-y-4">
+                <!-- 历史记录列表将在这里生成 -->
             </div>
-            <p id="hist-empty" class="text-center text-xs text-gray-300 py-2">暂无历史记录，所有菜品均可随机</p>
+            <p id="hist-empty" class="text-center text-xs text-gray-300 py-2">暂无历史记录</p>
         </div>
     </div>
 
@@ -209,28 +214,49 @@
         renderHist();
     }
 
+    function formatDate(ts) {
+        if(!ts) return '';
+        const date = new Date(ts);
+        const m = date.getMonth() + 1;
+        const d = date.getDate();
+        const week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][date.getDay()];
+        return `${m}月${d}日 ${week}`;
+    }
+
     function renderHist() {
         const section = document.getElementById('history-section');
-        const listEl = document.getElementById('hist-list');
+        const timelineEl = document.getElementById('hist-timeline');
         const emptyEl = document.getElementById('hist-empty');
         const countEl = document.getElementById('hist-count');
 
-        // 提取所有被屏蔽的菜名
+        // 提取所有被屏蔽的菜名数量
         const bannedDishes = new Set();
         hist.forEach(h => h.dishes.forEach(d => bannedDishes.add(d)));
-        const arr = Array.from(bannedDishes);
-
+        
         section.classList.remove('hidden');
-        countEl.textContent = arr.length;
+        countEl.textContent = bannedDishes.size;
 
-        if(arr.length === 0) {
-            listEl.innerHTML = '';
+        if(hist.length === 0) {
+            timelineEl.innerHTML = '';
             emptyEl.style.display = 'block';
         } else {
             emptyEl.style.display = 'none';
-            listEl.innerHTML = arr.map(name => 
-                `<span class="px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 border border-gray-200">${name}</span>`
-            ).join('');
+            timelineEl.innerHTML = hist.map((entry, index) => {
+                // 兼容旧数据（如果没有 timestamp，尝试用 date 字符串）
+                const dateDisplay = entry.timestamp ? formatDate(entry.timestamp) : (entry.date || '未知日期');
+                
+                return `
+                <div class="border-l-2 border-emerald-100 pl-4 py-1 relative">
+                    <div class="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-emerald-200 border-2 border-white"></div>
+                    <div class="text-xs text-gray-400 font-medium mb-1.5">${dateDisplay}</div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${entry.dishes.map(d => `
+                            <span class="px-2 py-0.5 bg-gray-50 rounded text-[11px] text-gray-600 border border-gray-100">${d}</span>
+                        `).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
     }
 
@@ -321,28 +347,21 @@
             }
 
             // --- 评分逻辑更新 ---
-            // 1. 绝对不能超过最大值 (35)
             if (p > limitMax) continue;
 
-            // 2. 计算此方案有多“好”
-            // 如果在 [29, 33] 之间，就是完美方案
-            // 如果不在，计算它距离这个区间的距离
             let diff = 0;
             if (p >= limitIdealMin && p <= limitIdealMax) {
                 diff = 0; // 完美
             } else if (p < limitIdealMin) {
-                diff = limitIdealMin - p; // 太便宜了
+                diff = limitIdealMin - p;
             } else {
-                // 这种情况其实不存在，因为上面 p > limitMax 已经过滤了
-                // 但为了逻辑严谨: 33 < p <= 35
-                diff = p - limitIdealMax; // 稍微有点贵，但没超标
+                diff = p - limitIdealMax;
             }
 
-            // 3. 更新最优解 (找 diff 最小的)
             if (diff < bestDiff) {
                 bestDiff = diff;
                 final = {m, p};
-                if (diff === 0) break; // 找到完美方案，提前结束
+                if (diff === 0) break;
             }
         }
 
@@ -411,11 +430,16 @@
     function copyMenu() {
         if(!best) return;
         
-        // 1. 纯净复制逻辑：只用顿号隔开菜名
+        // 1. 纯净复制逻辑
         const text = best.m.map(d => d.name).join('、');
 
-        // 2. 存入历史
-        hist.unshift({date:new Date().toLocaleDateString(), dishes:best.m.map(d=>d.name)});
+        // 2. 存入历史 (包含时间戳)
+        const now = new Date();
+        hist.unshift({
+            timestamp: now.getTime(),
+            date: now.toLocaleDateString(), 
+            dishes: best.m.map(d=>d.name)
+        });
         if(hist.length>5) hist = hist.slice(0,5);
         localStorage.setItem(HIST_KEY, JSON.stringify(hist));
         
