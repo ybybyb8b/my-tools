@@ -114,6 +114,28 @@
         .c-info h3 { margin: 0; font-size: 18px; margin-bottom: 4px; font-weight: 600; }
         .c-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
 
+        /* --- 中间步骤：类型展示卡片 --- */
+        .type-card-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .type-display-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            width: 80%;
+            margin-bottom: 40px;
+        }
+        .type-icon { font-size: 60px; margin-bottom: 20px; display: block;}
+        .type-name { font-size: 32px; font-weight: 800; color: #000; }
+        .type-hint { color: var(--text-sub); margin-top: 10px; font-size: 14px; }
+
+
         /* --- 结果页布局 --- */
         .result-container {
             flex: 1;
@@ -295,14 +317,36 @@
             </div>
         </div>
 
-        <!-- STEP 3: 结果展示 -->
+        <!-- STEP 3: 自煮类型确认 (仅 Cook 模式显示) -->
         <div class="step-view" id="step-3">
             <div class="back-btn" onclick="goToStep(2)">‹</div>
+            <div class="step-header" style="margin-left: 30px;">👨‍🍳 今天的主题是...</div>
+            
+            <div class="type-card-container">
+                <div class="type-display-card">
+                    <span class="type-icon" id="type-icon-disp">🥘</span>
+                    <div class="type-name" id="type-name-disp">炒菜</div>
+                    <div class="type-hint">不想做这个？点左下角换一个</div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn btn-sec" onclick="reRollType()">❌ 换个类型</button>
+                <button class="btn btn-pri" onclick="generateMenuFromType()">⬇️ 生成菜单</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: 最终菜单 (菜式确认) -->
+        <div class="step-view" id="step-4">
+            <div class="back-btn" onclick="goBackFromResult()">‹</div>
+            
+            <!-- 动态注入的区域 -->
             <div class="result-container" id="result-inject-area">
                 <!-- Javascript will populate this -->
             </div>
+            
             <div class="action-bar">
-                <button class="btn btn-sec" onclick="reRoll()">❌ 换一个</button>
+                <button class="btn btn-sec" onclick="reRollDish()">❌ 换道菜</button>
                 <button class="btn btn-pri" onclick="confirmChoice()">✅ 就吃这个</button>
             </div>
         </div>
@@ -316,6 +360,7 @@
     let STATE = {
         context: null, // 'shared' or 'solo'
         mode: null,    // 'takeout' or 'cook'
+        cookType: null, // 锁定的烹饪类型 (仅自煮模式)
         currentResult: null
     };
     
@@ -324,7 +369,6 @@
     /* ================= 初始化与数据加载 ================= */
     async function initData() {
         try {
-            // 使用时间戳防止缓存
             const response = await fetch('menu_data.json?t=' + new Date().getTime());
             if (!response.ok) throw new Error("File Read Error");
             MENUS = await response.json();
@@ -350,17 +394,27 @@
     }
 
     function selectContext(val) { STATE.context = val; goToStep(2); }
-    function selectMode(val) { STATE.mode = val; generateResult(); goToStep(3); }
 
-    function reRoll() {
-        const area = document.getElementById('result-inject-area');
-        area.style.opacity = 0.5;
-        area.style.transform = "scale(0.98)";
-        setTimeout(() => {
-            generateResult();
-            area.style.opacity = 1;
-            area.style.transform = "scale(1)";
-        }, 200);
+    function selectMode(val) { 
+        STATE.mode = val; 
+        if (val === 'takeout') {
+            // 外卖模式：直接跳到结果页 (Step 4)
+            generateResultTakeout();
+            goToStep(4);
+        } else {
+            // 自煮模式：先跳到类型选择 (Step 3)
+            generateCookType();
+            goToStep(3);
+        }
+    }
+
+    function goBackFromResult() {
+        // 如果是外卖，回 Step 2；如果是自煮，回 Step 3
+        if (STATE.mode === 'takeout') {
+            goToStep(2);
+        } else {
+            goToStep(3);
+        }
     }
 
     /* ================= 核心决策算法 ================= */
@@ -394,103 +448,171 @@
         return shuffled.slice(0, count);
     }
 
-    /* ================= 渲染结果 ================= */
-    function generateResult() {
-        const { context, mode } = STATE;
-        const pools = MENUS.pools || {};
-        const container = document.getElementById('result-inject-area');
-        container.innerHTML = ''; 
+    /* ================= 逻辑：Step 3 生成类型 ================= */
+    function generateCookType() {
+        const { context } = STATE;
+        const typeList = MENUS[context].cookTypes;
+        const cookTypeObj = weightedRandom(typeList);
+        
+        // 保存并展示
+        STATE.cookType = cookTypeObj.type;
+        
+        // 更新 UI
+        document.getElementById('type-name-disp').textContent = STATE.cookType;
+        
+        let icon = "🥘";
+        if (STATE.cookType.includes("火锅") || STATE.cookType.includes("水煮")) icon = "🍲";
+        else if (STATE.cookType.includes("焖")) icon = "🍛";
+        else if (STATE.cookType.includes("面") || STATE.cookType.includes("粉") || STATE.cookType.includes("速食")) icon = "🍜";
+        
+        document.getElementById('type-icon-disp').textContent = icon;
+    }
 
-        let mainItemName = "";
-        let headerText = "";
-        let headerIcon = "";
-        let contentHTML = "";
+    function reRollType() {
+        // 简单的动画效果
+        const card = document.querySelector('.type-display-card');
+        card.style.transform = "scale(0.95)";
+        card.style.opacity = "0.7";
+        setTimeout(() => {
+            generateCookType();
+            card.style.transform = "scale(1)";
+            card.style.opacity = "1";
+        }, 150);
+    }
 
-        if (mode === 'takeout') {
-            headerIcon = "🛵";
-            headerText = "外卖模式 · " + (context==='shared'?'双人':'独享');
-            
-            const list = MENUS[context].takeout;
-            let choice = weightedRandom(list);
-            for(let k=0; k<5; k++) {
-                if(!isRecent(choice.item)) break;
-                choice = weightedRandom(list);
+    function generateMenuFromType() {
+        generateResultCook();
+        goToStep(4);
+    }
+
+    /* ================= 逻辑：Step 4 生成结果 ================= */
+    
+    // 换道菜（不换类型）
+    function reRollDish() {
+        const area = document.getElementById('result-inject-area');
+        area.style.opacity = 0.5;
+        setTimeout(() => {
+            if (STATE.mode === 'takeout') {
+                generateResultTakeout();
+            } else {
+                generateResultCook();
             }
-            mainItemName = choice.item;
+            area.style.opacity = 1;
+        }, 200);
+    }
 
-            contentHTML = `
+    function generateResultTakeout() {
+        const { context } = STATE;
+        const list = MENUS[context].takeout;
+        let choice = weightedRandom(list);
+        
+        // 防重复
+        for(let k=0; k<5; k++) {
+            if(!isRecent(choice.item)) break;
+            choice = weightedRandom(list);
+        }
+        
+        renderResultUI("🛵", `外卖模式 · ${context==='shared'?'双人':'独享'}`, choice.item, "takeout");
+    }
+
+    function generateResultCook() {
+        const { context, cookType } = STATE; // 使用 Step 3 锁定的 cookType
+        const pools = MENUS.pools || {};
+        
+        let mainItemName = "";
+        let htmlContent = "";
+
+        if (cookType === '火锅' || cookType === '水煮菜') {
+            let meat = multiRandomUnique(pools.huncai, 1)[0];
+            for(let k=0; k<5; k++) {
+                if(!isRecent(meat)) break;
+                meat = multiRandomUnique(pools.huncai, 1)[0];
+            }
+            const veggies = multiRandomUnique(pools.sucai, 3).join('、');
+            const leaf = multiRandomUnique(pools.yecai, 1)[0];
+
+            mainItemName = meat;
+            htmlContent = `
                 <div class="dish-card primary">
-                    <div class="dish-icon">🥡</div>
-                    <div class="dish-name">${choice.item}</div>
+                    <div class="dish-icon">🥩</div>
+                    <div class="dish-name">${meat}</div>
+                </div>
+                <div class="dish-card secondary">
+                    <div class="dish-name" style="font-size: 16px;">🥬 配菜清单</div>
+                    <div class="dish-desc">${leaf}、${veggies}</div>
+                </div>
+            `;
+
+        } else if (cookType === '炒菜') {
+            const main = weightedRandom(pools.zhuchao).item;
+            const side = weightedRandom(pools.fuchao).item;
+            mainItemName = main;
+
+            htmlContent = `
+                <div class="dish-card primary" style="min-height: 110px;">
+                    <div class="dish-name">${main}</div>
+                </div>
+                <div class="dish-card primary" style="min-height: 110px; opacity: 0.9;">
+                    <div class="dish-name">${side}</div>
+                </div>
+            `;
+
+        } else if (cookType === '焖菜') {
+            const base = weightedRandom(pools.mencai).item;
+            let meat = multiRandomUnique(pools.huncai, 1)[0];
+            for(let k=0; k<5; k++) {
+                if(!isRecent(meat)) break;
+                meat = multiRandomUnique(pools.huncai, 1)[0];
+            }
+            const dishName = `${base}焖${meat}`;
+            mainItemName = dishName;
+
+            htmlContent = `
+                <div class="dish-card primary">
+                    <div class="dish-icon">🍛</div>
+                    <div class="dish-name">${dishName}</div>
+                    <div class="dish-desc" style="margin-top: 8px;">主料：${meat}</div>
                 </div>
             `;
 
         } else {
-            const typeList = MENUS[context].cookTypes;
-            const cookTypeObj = weightedRandom(typeList);
-            const cookType = cookTypeObj.type;
-            
-            headerIcon = "👨‍🍳";
-            headerText = "自己做 · " + cookType;
-
-            if (cookType === '火锅' || cookType === '水煮菜') {
-                let meat = multiRandomUnique(pools.huncai, 1)[0];
-                for(let k=0; k<5; k++) {
-                    if(!isRecent(meat)) break;
-                    meat = multiRandomUnique(pools.huncai, 1)[0];
-                }
-                const veggies = multiRandomUnique(pools.sucai, 3).join('、');
-                const leaf = multiRandomUnique(pools.yecai, 1)[0];
-
-                mainItemName = meat;
-                contentHTML = `
-                    <div class="dish-card primary">
-                        <div class="dish-icon">🥩</div>
-                        <div class="dish-name">${meat}</div>
-                    </div>
-                    <div class="dish-card secondary">
-                        <div class="dish-name" style="font-size: 16px;">🥬 配菜清单</div>
-                        <div class="dish-desc">${leaf}、${veggies}</div>
-                    </div>
-                `;
-
-            } else if (cookType === '炒菜') {
-                const main = weightedRandom(pools.zhuchao).item;
-                const side = weightedRandom(pools.fuchao).item;
-                mainItemName = main;
-
-                contentHTML = `
-                    <div class="dish-card primary" style="min-height: 110px;">
-                        <div class="dish-name">${main}</div>
-                    </div>
-                    <div class="dish-card primary" style="min-height: 110px; opacity: 0.9;">
-                        <div class="dish-name">${side}</div>
-                    </div>
-                `;
-
-            } else {
-                let poolName = cookType === '焖菜' ? 'mencai' : (cookType === '速食' ? 'sushi' : 'fangbiancai');
-                const dish = weightedRandom(pools[poolName]).item;
-                mainItemName = dish;
-                
-                let icon = cookType === '焖菜' ? '🍛' : '🍜';
-                contentHTML = `
-                    <div class="dish-card primary">
-                        <div class="dish-icon">${icon}</div>
-                        <div class="dish-name">${dish}</div>
-                    </div>
-                `;
-            }
+            let poolName = cookType === '速食' ? 'sushi' : 'fangbiancai'; 
+            const dish = weightedRandom(pools[poolName]).item;
+            mainItemName = dish;
+            let icon = '🍜';
+            htmlContent = `
+                <div class="dish-card primary">
+                    <div class="dish-icon">${icon}</div>
+                    <div class="dish-name">${dish}</div>
+                </div>
+            `;
         }
         
-        STATE.currentResult = mainItemName;
+        renderResultUI("👨‍🍳", `自己做 · ${cookType}`, mainItemName, "cook", htmlContent);
+    }
 
-        container.innerHTML = `
-            <div class="mode-pill">${headerIcon} ${headerText}</div>
-            <div class="dishes-wrapper">
-                ${contentHTML}
-            </div>
-        `;
+    function renderResultUI(icon, title, resultName, mode, customHTML) {
+        STATE.currentResult = resultName;
+        const container = document.getElementById('result-inject-area');
+        
+        if (mode === 'takeout') {
+            container.innerHTML = `
+                <div class="mode-pill">${icon} ${title}</div>
+                <div class="dishes-wrapper">
+                    <div class="dish-card primary">
+                        <div class="dish-icon">🥡</div>
+                        <div class="dish-name">${resultName}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="mode-pill">${icon} ${title}</div>
+                <div class="dishes-wrapper">
+                    ${customHTML}
+                </div>
+            `;
+        }
     }
 
     function confirmChoice() {
