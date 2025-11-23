@@ -26,7 +26,7 @@
   {"type":"辅荤", "name":"水煮肉片", "price":45.8, "size": "M"},
   {"type":"辅荤", "name":"五花肉爆牛肝菌", "price":45.8, "size": "M"},
   {"type":"辅荤", "name":"腊肉拼盘", "price":45.8, "mutex":"腊卤", "size": "M"},
-  {"type":"辅荤", "name":"浇汁小海鲜", "price":36.8, "size": "M"},
+  {"type":"凉菜", "name":"浇汁小海鲜", "price":36.8, "size": "M"},
   {"type":"辅荤", "name":"十八秒猪肝", "price":36.8,"mutex":"内脏", "size": "M"},
   {"type":"辅荤", "name":"鱼香肉丝", "price":36.8, "size": "M"},
   {"type":"辅荤", "name":"儿菜烩酥肉", "price":36.8,"mutex":"儿菜", "size": "M"},
@@ -70,5 +70,6 @@
   {"type":"小吃", "name":"手工拉丝糍粑（10个）", "price":28.8, "size": "S"},
   {"type":"小吃", "name":"炸小酥肉", "price":22.8, "size": "S"}
 ]
+
 
 
