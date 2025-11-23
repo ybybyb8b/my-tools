@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的工具箱</title>
+    <style>
+        :root {
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text: #1C1C1E;
+            --sub-text: #8E8E93;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 { margin: 0; font-size: 28px; color: var(--text); letter-spacing: 1px; }
+        p { color: var(--sub-text); font-size: 15px; margin-top: 8px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 22px;
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .card:active { transform: scale(0.98); }
+        
+        .icon-box {
+            width: 60px; height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+        
+        .c-dinner { background: #FFF3E0; } /* 浅橙 */
+        .c-chef { background: #E3F2FD; }   /* 浅蓝 */
+
+        .info h2 { margin: 0; font-size: 18px; font-weight: 600; }
+        .info span { font-size: 13px; color: var(--sub-text); display: block; margin-top: 4px; }
+
+        .arrow { margin-left: auto; color: #D1D1D6; font-size: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛠️ 我的工具箱</h1>
+        <p>Personal Utilities Hub</p>
+    </div>
+
+    <div class="grid">
+        <a href="dinner/" class="card">
+            <div class="icon-box c-dinner">🥗</div>
+            <div class="info">
+                <h2>晚餐决策助手</h2>
+                <span>解决“今晚吃什么”世纪难题</span>
+            </div>
+            <div class="arrow">›</div>
+        </a>
+
+        <a href="chef/" class="card">
+            <div class="icon-box c-chef">👨‍🍳</div>
+            <div class="info">
+                <h2>百年神厨点单</h2>
+                <span>多人聚餐，一键生成菜单</span>
+            </div>
+            <div class="arrow">›</div>
+        </a>
+    </div>
+
+</body>
+</html>
