@@ -25,18 +25,21 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .emoji-3d {
-            filter: drop-shadow(0px 10px 15px rgba(124, 58, 237, 0.25));
-            transform: perspective(500px) rotateX(10deg);
+        /* --- 3D 图片动画特效 --- */
+        .img-3d {
+            filter: drop-shadow(0px 10px 15px rgba(124, 58, 237, 0.15));
+            transform: perspective(500px) rotateX(5deg) scale(1);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            display: inline-block;
+            display: block;
+            object-fit: contain;
         }
-        .active-card:active .emoji-3d { transform: scale(0.9) rotateX(0deg); }
+        /* 按压时的微动效 */
+        .active-card:active .img-3d { transform: scale(0.9) rotateX(0deg); }
 
         .step-container {
             position: absolute; inset: 0;
             padding: 20px;
-            padding-top: calc(env(safe-area-inset-top) + 60px); /* 增加顶部空间，避开 Header */
+            padding-top: calc(env(safe-area-inset-top) + 80px);
             padding-bottom: 100px;
             display: flex; flex-direction: column;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -65,34 +68,17 @@
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* 返回按钮样式 */
-        .back-btn {
-            position: absolute;
-            top: calc(env(safe-area-inset-top) + 15px); 
-            left: 20px;
-            width: 40px; height: 40px;
-            background: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            font-size: 20px; color: #6B7280;
-            z-index: 50; /* 确保在最上层 */
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .back-btn:active { transform: scale(0.9); }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- 顶部状态栏 (pointer-events-none 防止遮挡点击) -->
-    <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-40 pointer-events-none pt-[calc(env(safe-area-inset-top)+20px)]">
-        <!-- Home 键 (pointer-events-auto 恢复点击) -->
-        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-xl cursor-pointer pointer-events-auto hover:bg-gray-50 active:scale-90 transition" onclick="location.href='../index.html'">
+    <!-- 统一顶部导航栏 -->
+    <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50 pointer-events-none pt-[calc(env(safe-area-inset-top)+20px)]">
+        <div id="nav-btn" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm cursor-pointer pointer-events-auto hover:bg-gray-50 active:scale-90 transition text-xl" onclick="handleNavClick()">
             🏠
         </div>
-        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm pointer-events-auto">
-            <div class="w-full h-full bg-purple-200 flex items-center justify-center text-xs font-bold text-purple-600">ME</div>
+        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm pointer-events-auto bg-purple-100">
+            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Person/3D/person_3d.png" class="w-full h-full object-cover">
         </div>
     </div>
 
@@ -101,14 +87,17 @@
 
         <!-- STEP 1: 用餐情景 -->
         <div class="step-container active" id="step-1">
-            <div class="mt-4 mb-6">
+            <div class="mt-2 mb-6">
                 <h2 class="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-1">Dinner Decider</h2>
                 <h1 class="text-4xl font-bold text-[#1E1B4B]">Who is<br>eating today?</h1>
             </div>
 
             <div class="flex-1 overflow-y-auto no-scrollbar space-y-5">
+                <!-- 替换为图片 -->
                 <div onclick="selectContext('shared')" class="active-card glass-card p-6 flex items-center gap-5 cursor-pointer transition transform active:scale-95">
-                    <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center text-4xl emoji-3d">👩‍❤️‍👨</div>
+                    <div class="w-20 h-20 bg-orange-100 rounded-3xl flex items-center justify-center overflow-hidden">
+                        <img src="" id="img-shared" class="img-3d w-16">
+                    </div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">二人食</h3>
                         <p class="text-sm text-gray-500 mt-1">口味折中，温馨晚餐</p>
@@ -117,7 +106,9 @@
                 </div>
 
                 <div onclick="selectContext('solo')" class="active-card glass-card p-6 flex items-center gap-5 cursor-pointer transition transform active:scale-95">
-                    <div class="w-20 h-20 bg-purple-100 rounded-3xl flex items-center justify-center text-4xl emoji-3d">💃</div>
+                    <div class="w-20 h-20 bg-purple-100 rounded-3xl flex items-center justify-center overflow-hidden">
+                        <img src="" id="img-solo" class="img-3d w-16">
+                    </div>
                     <div>
                         <h3 class="text-xl font-bold text-gray-900">自己独享</h3>
                         <p class="text-sm text-gray-500 mt-1">想吃啥吃啥，放飞自我</p>
@@ -129,22 +120,23 @@
 
         <!-- STEP 2: 模式选择 -->
         <div class="step-container" id="step-2">
-            <!-- 统一的悬浮返回键 -->
-            <div class="back-btn" onclick="goToStep(1)">‹</div>
-
-            <div class="mt-12 mb-6">
+            <div class="mt-10 mb-6">
                 <h1 class="text-4xl font-bold text-[#1E1B4B]">Delivery or<br>Cooking?</h1>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div onclick="selectMode('takeout')" class="active-card glass-card p-5 flex flex-col items-center justify-center text-center h-56 cursor-pointer transition transform active:scale-95">
-                    <div class="text-6xl mb-4 emoji-3d">🛵</div>
+                    <div class="h-24 flex items-center justify-center mb-2">
+                        <img src="" id="img-takeout" class="img-3d w-20">
+                    </div>
                     <h3 class="text-lg font-bold text-gray-900">点外卖</h3>
                     <span class="text-xs text-purple-500 font-medium mt-2 bg-purple-50 px-3 py-1 rounded-full">Lazy Mode</span>
                 </div>
 
                 <div onclick="selectMode('cook')" class="active-card glass-card p-5 flex flex-col items-center justify-center text-center h-56 cursor-pointer transition transform active:scale-95">
-                    <div class="text-6xl mb-4 emoji-3d">👨‍🍳</div>
+                    <div class="h-24 flex items-center justify-center mb-2">
+                        <img src="" id="img-cook" class="img-3d w-20">
+                    </div>
                     <h3 class="text-lg font-bold text-gray-900">自己煮</h3>
                     <span class="text-xs text-orange-500 font-medium mt-2 bg-orange-50 px-3 py-1 rounded-full">Chef Mode</span>
                 </div>
@@ -153,13 +145,16 @@
 
         <!-- STEP 3: 类型确认 (自煮) -->
         <div class="step-container" id="step-3">
-            <div class="back-btn" onclick="goToStep(2)">‹</div>
-
             <div class="flex flex-col h-full justify-center items-center text-center">
                 <h2 class="text-purple-500 font-bold tracking-wider uppercase text-sm mb-4">Cooking Category</h2>
                 <div class="glass-card w-full p-10 relative overflow-hidden">
                     <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-100 rounded-full opacity-50"></div>
-                    <div class="text-[120px] leading-none mb-6 emoji-3d transition-all duration-300" id="type-icon-disp">🥘</div>
+                    
+                    <!-- 图片容器 -->
+                    <div class="h-40 flex items-center justify-center mb-6">
+                        <img src="" id="type-img-disp" class="img-3d w-32 h-32 object-contain transition-all duration-300">
+                    </div>
+                    
                     <h1 class="text-3xl font-extrabold text-gray-900 mb-2" id="type-name-disp">炒菜</h1>
                     <p class="text-gray-400 text-sm">今天的主题类型</p>
                 </div>
@@ -173,8 +168,6 @@
 
         <!-- STEP 4: 最终结果 -->
         <div class="step-container" id="step-4">
-            <div class="back-btn" onclick="goBackFromResult()">‹</div>
-
             <div class="flex-1 flex flex-col pt-8">
                 <div class="flex justify-center mb-4">
                     <div class="px-4 py-1 bg-black/5 rounded-full text-xs font-bold text-gray-500 uppercase tracking-wide" id="res-mode-badge">MODE</div>
@@ -204,8 +197,46 @@
 
 <script>
     let MENUS = {}; 
-    let STATE = { context: null, mode: null, cookType: null, currentResult: null };
+    let STATE = { context: null, mode: null, cookType: null, currentResult: null, step: 1 };
     const HIST_KEY = "dinner_app_history";
+
+    /* ================= 图片配置表 (ICON_MAP) ================= */
+    // 这里的链接使用的是 Microsoft 3D Fluent Emojis 的开源 CDN
+    // 如果您想换成自己的图片，直接把 URL 替换成您的图片地址即可 (支持 png/jpg/gif)
+    const ICON_MAP = {
+        "shared": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/People%20Holding%20Hands/3D/people_holding_hands_3d.png",
+        "solo": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Person%20Shrugging%20Medium-Light%20Skin%20Tone/3D/person_shrugging_medium-light_skin_tone_3d.png",
+        
+        "takeout": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Travel%20and%20places/Motor%20Scooter/3D/motor_scooter_3d.png",
+        "cook": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/People/Cook%20Medium-Light%20Skin%20Tone/3D/cook_medium-light_skin_tone_3d.png",
+        
+        // 烹饪类型对应的图片
+        "types": {
+            "火锅": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Pot%20of%20Food/3D/pot_of_food_3d.png",
+            "水煮菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Pot%20of%20Food/3D/pot_of_food_3d.png",
+            "炒菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Shallow%20Pan%20of%20Food/3D/shallow_pan_of_food_3d.png",
+            "焖菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Canned%20Food/3D/canned_food_3d.png",
+            "速食": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Steaming%20Bowl/3D/steaming_bowl_3d.png",
+            "方便菜": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Takeout%20Box/3D/takeout_box_3d.png",
+            "default": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Fork%20and%20Knife%20with%20Plate/3D/fork_and_knife_with_plate_3d.png"
+        },
+
+        // 结果页的图片 (主菜展示)
+        "results": {
+            "takeout": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Takeout%20Box/3D/takeout_box_3d.png",
+            "meat": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Cut%20of%20Meat/3D/cut_of_meat_3d.png",
+            "main": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Shallow%20Pan%20of%20Food/3D/shallow_pan_of_food_3d.png",
+            "noodle": "https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis/master/Emojis/Food%20and%20drink/Steaming%20Bowl/3D/steaming_bowl_3d.png"
+        }
+    };
+
+    /* ================= 初始化图片 ================= */
+    function loadStaticImages() {
+        document.getElementById('img-shared').src = ICON_MAP.shared;
+        document.getElementById('img-solo').src = ICON_MAP.solo;
+        document.getElementById('img-takeout').src = ICON_MAP.takeout;
+        document.getElementById('img-cook').src = ICON_MAP.cook;
+    }
 
     // 备份数据
     const FALLBACK_DATA = {
@@ -230,6 +261,7 @@
     };
 
     async function initData() {
+        loadStaticImages(); // 加载首页图片
         try {
             const response = await fetch('menu_data.json?t=' + new Date().getTime());
             if (!response.ok) throw new Error("Fetch Failed");
@@ -240,7 +272,30 @@
         }
     }
 
+    // --- 统一导航处理 ---
+    function handleNavClick() {
+        if (STATE.step === 1) location.href = '../index.html';
+        else if (STATE.step === 2) goToStep(1);
+        else if (STATE.step === 3) goToStep(2);
+        else if (STATE.step === 4) { if (STATE.mode === 'takeout') goToStep(2); else goToStep(3); }
+    }
+
+    function updateNavButton() {
+        const btn = document.getElementById('nav-btn');
+        if (STATE.step === 1) {
+            btn.innerHTML = '🏠';
+            btn.classList.remove('text-2xl', 'text-gray-600');
+            btn.classList.add('text-xl');
+        } else {
+            btn.innerHTML = '‹'; 
+            btn.classList.remove('text-xl');
+            btn.classList.add('text-2xl', 'text-gray-600');
+        }
+    }
+
     function goToStep(stepNum) {
+        STATE.step = stepNum;
+        updateNavButton();
         document.querySelectorAll('.step-container').forEach(el => { el.classList.remove('active', 'prev'); });
         for(let i=1; i<stepNum; i++) { document.getElementById(`step-${i}`).classList.add('prev'); }
         document.getElementById(`step-${stepNum}`).classList.add('active');
@@ -279,15 +334,19 @@
     function generateCookType() {
         const type = weightedRandom(MENUS[STATE.context].cookTypes).type;
         STATE.cookType = type;
+        
         document.getElementById('type-name-disp').innerText = type;
-        let icon = "🥘";
-        if (type.includes("火锅") || type.includes("水煮")) icon = "🍲";
-        else if (type.includes("焖")) icon = "🍛";
-        else if (type.includes("面") || type.includes("粉") || type.includes("速食")) icon = "🍜";
-        document.getElementById('type-icon-disp').innerText = icon;
+        
+        // 根据类型名称获取图片URL (模糊匹配)
+        let imgUrl = ICON_MAP.types.default;
+        for(let key in ICON_MAP.types) {
+            if(type.includes(key)) { imgUrl = ICON_MAP.types[key]; break; }
+        }
+        
+        document.getElementById('type-img-disp').src = imgUrl;
     }
     function reRollType() {
-        const el = document.getElementById('type-icon-disp');
+        const el = document.getElementById('type-img-disp');
         el.style.transform = "rotateX(90deg)";
         setTimeout(() => { generateCookType(); el.style.transform = "rotateX(0deg)"; }, 150);
     }
@@ -304,12 +363,16 @@
         }, 300);
     }
 
+    // --- 渲染核心 (图片版) ---
     function generateResultTakeout() {
         const list = MENUS[STATE.context].takeout;
         let choice = weightedRandom(list);
         for(let k=0; k<5; k++) { if(!isRecent(choice.item)) break; choice = weightedRandom(list); }
+        
         renderUI("🛵", "外卖", choice.item, `
-            <div class="text-[100px] emoji-3d mb-6">🥡</div>
+            <div class="h-32 flex items-center justify-center mb-6">
+                <img src="${ICON_MAP.results.takeout}" class="img-3d w-28 h-28 object-contain">
+            </div>
             <h2 class="text-3xl font-extrabold text-gray-900 mb-2 px-4 leading-tight">${choice.item}</h2>
             <p class="text-purple-500 font-medium bg-purple-50 px-4 py-1 rounded-full inline-block mt-2">预计 30 分钟送达</p>
         `);
@@ -326,7 +389,9 @@
             const v = multiRandomUnique(pools.sucai, 3).join('、');
             main = meat;
             html = `
-                <div class="text-[80px] emoji-3d mb-4">🍲</div>
+                <div class="h-24 flex items-center justify-center mb-2">
+                    <img src="${ICON_MAP.results.meat}" class="img-3d w-24 h-24 object-contain">
+                </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 mb-1">${meat}</h2>
                 <p class="text-gray-400 text-sm mb-6 uppercase tracking-wide font-bold">${type}</p>
                 <div class="w-full bg-gray-50 rounded-2xl p-4 text-left">
@@ -338,7 +403,9 @@
             main = weightedRandom(pools.zhuchao).item;
             const side = weightedRandom(pools.fuchao).item;
             html = `
-                <div class="text-[80px] emoji-3d mb-2">🥘</div>
+                <div class="h-24 flex items-center justify-center mb-2">
+                    <img src="${ICON_MAP.results.main}" class="img-3d w-24 h-24 object-contain">
+                </div>
                 <div class="space-y-3 w-full">
                     <div class="bg-orange-50 p-4 rounded-3xl border border-orange-100">
                         <span class="text-xs text-orange-400 font-bold uppercase">主菜</span>
@@ -355,7 +422,9 @@
             let meat = multiRandomUnique(pools.huncai, 1)[0];
             main = `${base}焖${meat}`;
             html = `
-                <div class="text-[100px] emoji-3d mb-4">🍛</div>
+                <div class="h-32 flex items-center justify-center mb-6">
+                    <img src="${ICON_MAP.types['焖菜']}" class="img-3d w-28 h-28 object-contain">
+                </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 leading-tight px-2">${main}</h2>
                 <p class="text-sm text-gray-400 mt-2 bg-gray-100 px-3 py-1 rounded-full inline-block">万物皆可焖</p>
             `;
@@ -363,7 +432,9 @@
             let pool = type === '速食' ? 'sushi' : 'fangbiancai';
             main = weightedRandom(pools[pool]).item;
             html = `
-                <div class="text-[100px] emoji-3d mb-4">🍜</div>
+                <div class="h-32 flex items-center justify-center mb-6">
+                    <img src="${ICON_MAP.results.noodle}" class="img-3d w-28 h-28 object-contain">
+                </div>
                 <h2 class="text-3xl font-extrabold text-gray-900 leading-tight px-4">${main}</h2>
                 <p class="text-sm text-gray-400 mt-2">快速解决战斗</p>
             `;
