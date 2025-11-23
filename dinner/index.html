@@ -354,7 +354,7 @@
     </div>
 
 <script>
-    let MENUS = {}; // 数据将从 JSON 加载
+    let MENUS = {}; 
 
     /* ================= 状态管理 ================= */
     let STATE = {
@@ -366,19 +366,91 @@
     
     const HIST_KEY = "dinner_app_history";
 
-    /* ================= 初始化与数据加载 ================= */
+    // --- 备份数据：当无法读取 JSON 文件时使用 ---
+    const FALLBACK_DATA = {
+      "solo": {
+        "takeout": [
+          { "item": "螺蛳粉", "weight": 5 },
+          { "item": "麻辣烫", "weight": 4 },
+          { "item": "轻食沙拉", "weight": 2 },
+          { "item": "日式拉面", "weight": 3 }
+        ],
+        "cookTypes": [
+          { "type": "速食", "weight": 10 },
+          { "type": "方便菜", "weight": 8 },
+          { "type": "焖菜", "weight": 3 },
+          { "type": "炒菜", "weight": 1 }
+        ]
+      },
+      "shared": {
+        "takeout": [
+          { "item": "东北饺子", "weight": 5 },
+          { "item": "必胜客", "weight": 3 },
+          { "item": "麦当劳", "weight": 3 },
+          { "item": "潮汕牛肉火锅", "weight": 2 },
+          { "item": "家常菜馆", "weight": 4 }
+        ],
+        "cookTypes": [
+          { "type": "炒菜", "weight": 5 },
+          { "type": "水煮菜", "weight": 3 },
+          { "type": "火锅", "weight": 2 },
+          { "type": "焖菜", "weight": 3 }
+        ]
+      },
+      "pools": {
+        "huncai": ["肥牛卷", "羊肉卷", "大虾", "午餐肉", "鱼片", "肉丸"],
+        "sucai": ["土豆片", "金针菇", "冻豆腐", "海带结", "宽粉", "藕片", "腐竹", "冬瓜", "香菇", "木耳"],
+        "yecai": ["生菜", "娃娃菜", "油麦菜", "菠菜", "茼蒿"],
+        "zhuchao": [
+          { "item": "青椒肉丝", "weight": 5 },
+          { "item": "番茄炒蛋", "weight": 4 },
+          { "item": "宫保鸡丁", "weight": 3 },
+          { "item": "回锅肉", "weight": 3 },
+          { "item": "小炒黄牛肉", "weight": 2 }
+        ],
+        "fuchao": [
+          { "item": "蒜蓉时蔬", "weight": 5 },
+          { "item": "手撕包菜", "weight": 4 },
+          { "item": "凉拌黄瓜", "weight": 3 },
+          { "item": "酸辣土豆丝", "weight": 3 }
+        ],
+        "mencai": [
+          { "item": "口蘑", "weight": 3 },
+          { "item": "娃娃菜", "weight": 3 },
+          { "item": "胡萝卜豆芽", "weight": 3 },
+          { "item": "芹菜", "weight": 3 },
+          { "item": "萝卜丝", "weight": 3 }
+        ],
+        "sushi": [
+          { "item": "冷冻水饺", "weight": 5 },
+          { "item": "葱油拌面", "weight": 4 },
+          { "item": "螺蛳粉(自煮)", "weight": 3 },
+          { "item": "韩式火鸡面", "weight": 2 }
+        ],
+        "fangbiancai": [
+          { "item": "宫保鸡丁(半成品)", "weight": 1 },
+          { "item": "小酥肉(空气炸锅)", "weight": 1 }
+        ]
+      }
+    };
+
     async function initData() {
         try {
+            // 1. 优先尝试读取 GitHub 上的文件
             const response = await fetch('menu_data.json?t=' + new Date().getTime());
-            if (!response.ok) throw new Error("File Read Error");
+            if (!response.ok) throw new Error("Network response was not ok");
             MENUS = await response.json();
             
-            document.getElementById('db-status').textContent = "Ready";
+            // 成功读取
+            document.getElementById('db-status').textContent = "Cloud Data";
             document.getElementById('db-status').style.color = "#34C759";
         } catch (e) {
-            document.getElementById('db-status').textContent = "❌ Offline";
-            console.error(e);
-            alert("无法读取菜单数据，请检查 menu_data.json 文件是否存在。");
+            // 2. 读取失败（如本地运行），使用备份数据
+            console.warn("无法读取 menu_data.json，已切换至内置备份数据。", e);
+            MENUS = FALLBACK_DATA;
+            
+            document.getElementById('db-status').textContent = "Local Mode";
+            document.getElementById('db-status').style.color = "#FF9500"; 
         }
     }
 
