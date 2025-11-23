@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>百年神厨 - 智能点餐</title>
+    <style>
+        /* V12.0 粉蓝马卡龙配色 */
+        :root {
+            --primary: #FF8CA1;      /* 樱花粉 */
+            --primary-hover: #F06A85; 
+            --secondary: #74B9FF;    /* 天空蓝 */
+            --bg: #F0F4F8;           
+            --card-bg: #FFFFFF;
+            --text-main: #57606F;    
+            --text-light: #A4B0BE;
+            --radius: 20px;
+            --shadow: 0 8px 20px rgba(166, 179, 194, 0.2);
+        }
+
+        body {
+            font-family: -apple-system, "Microsoft YaHei", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #FF8CA1 0%, #74B9FF 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        .status-bar { font-size: 12px; opacity: 0.9; margin-top: 5px; }
+
+        .content { padding: 30px 20px; }
+
+        /* 输入区 */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .p-label { font-size: 15px; color: var(--text-light); }
+        input[type="number"] {
+            width: 70px;
+            padding: 10px;
+            border: 2px solid #F1F2F6;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            color: var(--primary);
+            outline: none;
+        }
+        input[type="number"]:focus { border-color: var(--primary); }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 140, 161, 0.4);
+            transition: 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+        
+        .btn-ghost {
+            background: transparent; color: var(--text-light); border: 1px solid #eee; 
+            padding: 8px 15px; font-size: 12px; box-shadow: none;
+        }
+
+        /* 结果小票 */
+        .receipt-card {
+            background: #fff;
+            border: 1px solid #F1F2F6;
+            border-radius: 16px;
+            padding: 20px;
+            animation: slideUp 0.4s ease;
+            display: none;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .summary-box {
+            background: linear-gradient(to right, #e3f2fd, #f3e5f5);
+            color: #57606f;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        td { padding: 10px 0; border-bottom: 1px solid #f8f9fa; }
+        .price { text-align: right; font-weight: 500; }
+        
+        .tag { padding: 3px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px; vertical-align: middle; }
+        .t-L { background: #ffeaa7; color: #e17055; }
+        .t-M { background: #74b9ff; color: #fff; }
+        .t-S { background: #55efc4; color: #00b894; }
+
+        .copy-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--secondary);
+            box-shadow: 0 4px 10px rgba(116, 185, 255, 0.3);
+        }
+        
+        .footer-actions {
+            margin-top: 30px;
+            text-align: center;
+            border-top: 1px dashed #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="header">
+        <h1>🍱 百年神厨 · 智能点餐</h1>
+        <div class="status-bar" id="status">正在连接菜单数据库...</div>
+    </div>
+
+    <div class="content">
+        <div class="control-panel">
+            <span class="p-label">用餐人数</span>
+            <input type="number" id="pCount" value="10">
+            <button class="btn" id="genBtn" onclick="generate()" disabled>🪄 生成</button>
+        </div>
+
+        <div id="res" class="receipt-card">
+            <div id="sum" class="summary-box"></div>
+            <div id="list"></div>
+            <div id="bud" style="margin-top:15px; text-align:center; font-size:13px; font-weight:bold; color:var(--text-light);"></div>
+            
+            <button class="btn copy-btn" onclick="copyMenu()">📋 复制菜单文本</button>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn btn-ghost" onclick="clearHist()">🗑️ 清空“吃过”的历史记录</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let db = [];
+    let hist = [];
+    let best = null;
+    const HIST_KEY = 'sz_hist_v10'; // 仅保留历史记录，不存菜单
+
+    // 初始化
+    async function init() {
+        try {
+            const res = await fetch('dishes.json?t=' + new Date().getTime());
+            if(!res.ok) throw new Error("加载失败");
+            const raw = await res.json();
+            
+            // 自动计算分量 (保留之前的逻辑)
+            db = raw.map(d => ({
+                ...d, 
+                size: autoSize(d.name), 
+                mutex: d.mutex || ""
+            }));
+
+            // 读取本地历史 (避免重复)
+            const h = localStorage.getItem(HIST_KEY);
+            hist = h ? JSON.parse(h) : [];
+
+            document.getElementById('status').textContent = "✅ 菜单已同步";
+            document.getElementById('genBtn').disabled = false;
+        } catch(e) {
+            document.getElementById('status').textContent = "❌ 无法加载 dishes.json";
+        }
+    }
+
+    function autoSize(n) {
+        if(n.includes("全家福")) return 'L';
+        if(n.includes("小份")||n.includes("一条")) return 'S';
+        if((n.includes("鱼")||n.includes("鸡")||n.includes("兔")||n.includes("蛙")||n.includes("鸭")) && !n.includes("片") && !n.includes("丝") && !n.includes("丁")) return 'L';
+        return 'M';
+    }
+
+    function shuffle(a) { return a.sort(()=>Math.random()-0.5); }
+    
+    // 核心生成逻辑 (保持不变)
+    function generate() {
+        const num = parseInt(document.getElementById('pCount').value);
+        if(num<2) { alert("至少2人用餐"); return; }
+
+        const tables = Math.ceil(num/11);
+        const pPerT = Math.ceil(num/tables);
+        const limit = pPerT * 30;
+        const isMega = pPerT >= 8;   
+        const isLarge = pPerT === 7; 
+        const isSmall = pPerT < 7;
+        const totalD = Math.max(2, pPerT - 1);
+
+        // 过滤历史
+        const ban = new Set();
+        hist.forEach(h => h.dishes.forEach(d => ban.add(d)));
+        let pool = db.filter(d => !ban.has(d.name));
+        if(pool.length < 10) pool = db; // 菜不够了就忽略历史
+
+        const cats = {
+            soup: pool.filter(d=>d.type==="汤品"),
+            main: pool.filter(d=>d.type==="主荤"),
+            side: pool.filter(d=>d.type==="辅荤"),
+            veg: pool.filter(d=>d.type==="素菜"),
+            cold: pool.filter(d=>d.type==="凉菜"),
+            oth: pool.filter(d=>["下饭菜","小吃"].includes(d.type))
+        };
+
+        // 算法尝试300次取最优
+        let final = null;
+        let minDiff = 99999;
+
+        for(let k=0; k<300; k++) {
+            let m = [];
+            let p = 0;
+            let slots = totalD;
+            let meat = 0;
+            
+            const pick = (arr) => {
+                let v = arr.filter(x => !m.includes(x) && (!x.mutex || !m.some(ex => ex.mutex === x.mutex)));
+                if(!v.length) return null;
+                return shuffle(v)[0];
+            };
+
+            // A. 汤
+            if(cats.soup.length) {
+                let d = pick(cats.soup) || shuffle(cats.soup)[0];
+                if(d) { m.push(d); p+=d.price; slots--; }
+            }
+
+            // B. 主荤 (按桌型大小决定份量偏好)
+            const mL = cats.main.filter(d=>d.size==='L');
+            const mM = cats.main.filter(d=>d.size==='M');
+            
+            if(slots>0) {
+                if(isMega) { // 大桌优先大菜
+                    let d1 = pick(mL) || pick(cats.main);
+                    if(d1) { m.push(d1); p+=d1.price; slots--; meat++; }
+                    if(slots>0) { let d2 = pick(mM) || pick(cats.main); if(d2) { m.push(d2); p+=d2.price; slots--; meat++; } }
+                } else {
+                    let d = pick(mM) || pick(cats.main);
+                    if(d) { m.push(d); p+=d.price; slots--; meat++; }
+                }
+            }
+
+            // C. 必选素菜
+            if(slots>0 && cats.veg.length) {
+                let d = pick(cats.veg);
+                if(d) { m.push(d); p+=d.price; slots--; }
+            }
+
+            // D. 填充剩余
+            let targetMeat = isSmall ? 3 : 4;
+            while(slots>0) {
+                let sub = [];
+                if(meat < targetMeat) sub = [...cats.side, ...cats.main];
+                else sub = [...cats.side, ...cats.oth, ...cats.veg, ...cats.cold];
+                
+                let d = pick(sub);
+                if(!d) break;
+                
+                m.push(d); p+=d.price; slots--;
+                if(d.type.includes("荤")) meat++;
+            }
+
+            if(p <= limit) { final = {m, p}; break; } // 预算内直接返回
+            else if(p < minDiff) { minDiff = p; final = {m, p}; } // 记录最小超支
+        }
+
+        if(!final) { alert("生成失败，菜品库不足"); return; }
+        best = final;
+        render(final, num, tables, pPerT, limit);
+    }
+
+    function render(plan, total, t, ppt, limit) {
+        document.getElementById('res').style.display = 'block';
+        const ord = {"汤品":1,"主荤":2,"辅荤":3,"凉菜":4,"下饭菜":5,"素菜":6,"小吃":7};
+        plan.m.sort((a,b)=>(ord[a.type]||9)-(ord[b.type]||9));
+
+        document.getElementById('sum').innerHTML = `<div>👥 <strong>${total}人</strong> (${t}桌) | 预算 ¥${limit}</div>`;
+        
+        let h = `<table>`;
+        plan.m.forEach(d => {
+            let tag = d.size=='L'?'L':(d.size=='S'?'S':'');
+            let tagHtml = tag ? `<span class="tag t-${tag}">${tag=='L'?'大':'小'}</span>` : '';
+            h += `<tr><td><div style="color:#999;font-size:12px">${d.type}</div>${d.name}${tagHtml}</td><td class="price">¥${d.price}</td></tr>`;
+        });
+        h += `<tr style="border-top:2px solid #eee"><td style="font-weight:bold">合计</td><td class="price" style="font-weight:bold">¥${plan.p.toFixed(1)}</td></tr></table>`;
+        document.getElementById('list').innerHTML = h;
+        
+        let avg = (plan.p/ppt).toFixed(1);
+        let budEl = document.getElementById('bud');
+        budEl.innerHTML = plan.p<=limit ? `✅ 人均 ¥${avg} (预算内)` : `⚠️ 人均 ¥${avg} (超支)`;
+        budEl.style.color = plan.p<=limit ? "#00b894" : "#ff7675";
+    }
+
+    function copyMenu() {
+        if(!best) return;
+        let t = best.m.map(d=>d.name).join('、');
+        
+        // 记录历史
+        hist.unshift({date:new Date().toLocaleDateString(), dishes:best.m.map(d=>d.name)});
+        if(hist.length>5) hist = hist.slice(0,5);
+        localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+
+        navigator.clipboard.writeText(t).then(()=>alert("已复制！"));
+    }
+
+    function clearHist() {
+        if(confirm("要清空‘已吃过’的记录吗？")) {
+            hist = [];
+            localStorage.removeItem(HIST_KEY);
+            alert("历史记录已清空");
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
