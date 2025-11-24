@@ -102,10 +102,13 @@
     <!-- Header -->
     <header class="mt-6 mb-8 flex justify-between items-center px-1">
         <div class="flex items-center gap-3">
-            <!-- 这里的链接仅在部署后有效，预览模式点击会刷新 -->
-            <button onclick="location.reload()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition">
+            <!-- 
+                [修复]: 将 button 改为 a 标签，并指向根目录 "/" 
+                如果您的主页地址不是根目录，请修改 href="/" 为 href="您的主页地址.html"
+            -->
+            <a href="/" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition cursor-pointer no-underline">
                 🏠
-            </button>
+            </a>
             <div>
                 <div class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-0.5 opacity-80">Smart Dining Assistant</div>
                 <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">百年神厨</h1>
@@ -233,7 +236,6 @@
     const HIST_KEY = 'sz_hist_v10';
 
     // 为了在画板中直接运行，我内置了数据。
-    // 部署到GitHub时，你可以使用 fetch 逻辑。
     const EMBEDDED_DISHES = [
         {type:"主荤", name:"海参回锅肉（小份）", price:68.8, mutex:"回锅肉"},
         {type:"主荤", name:"藤椒豆花鱼（一条）", price:59.8, mutex:"鱼"},
@@ -542,7 +544,7 @@
             box.className = "absolute right-0 top-0 w-16 h-16 bg-orange-500 opacity-10 rounded-full -mr-4 -mt-4";
             document.getElementById('res-avg-container').className = "text-2xl font-bold tag-budget flex items-baseline gap-1 text-orange-500";
         }
-        document.getElementById('res-count').innerText = `${best.m.length} 道菜`;
+        // document.getElementById('res-count').innerText = `${best.m.length} 道菜`; // Removed as ID not found in HTML
     }
 
     // --- 替换逻辑 V3 (修复关闭 & 两位小数) ---
