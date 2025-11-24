@@ -2,101 +2,189 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MyTools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>我的工具箱</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --bg: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --text: #1C1C1E;
-            --sub-text: #8E8E93;
+            --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: var(--font-ios);
+            background-color: #F8FAFC; /* 极淡的灰白底色 */
+            color: #1E293B; /* 深蓝灰文字 */
             min-height: 100vh;
-            box-sizing: border-box;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        h1 { margin: 0; font-size: 28px; color: var(--text); letter-spacing: 1px; }
-        p { color: var(--sub-text); font-size: 15px; margin-top: 8px; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            width: 100%;
-            max-width: 400px;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 22px;
-            padding: 25px;
-            text-decoration: none;
-            color: var(--text);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border: 1px solid rgba(0,0,0,0.02);
+        /* --- 1. 空气感流体背景 (Airy Aurora) --- */
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: #F8FAFC;
+            overflow: hidden;
         }
-        .card:active { transform: scale(0.98); }
-        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* 强模糊 */
+            opacity: 0.8;
+            animation: float 15s infinite ease-in-out alternate;
+        }
+        /* 配色：清新的淡彩 */
+        .orb-1 {
+            top: -10%; left: -10%; width: 70vw; height: 70vw;
+            background: #BAE6FD; /* Light Sky Blue */
+            animation-duration: 20s;
+        }
+        .orb-2 {
+            bottom: -10%; right: -10%; width: 80vw; height: 80vw;
+            background: #E9D5FF; /* Light Purple */
+            animation-duration: 25s;
+            animation-delay: -5s;
+        }
+        .orb-3 {
+            top: 40%; left: 30%; width: 50vw; height: 50vw;
+            background: #FECACA; /* Light Pink */
+            opacity: 0.6;
+            animation-duration: 18s;
+            animation-delay: -8s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        /* --- 2. 清透水晶卡片 (Crystal Glass) --- */
+        .ios-glass {
+            background: rgba(255, 255, 255, 0.6); /* 60% 透明白 */
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.8); /* 明显的白色高光边框 */
+            box-shadow: 
+                0 10px 30px -10px rgba(148, 163, 184, 0.4), /* 柔和的彩色投影 */
+                inset 0 0 20px rgba(255, 255, 255, 0.5); /* 内发光 */
+            border-radius: 32px;
+        }
+
+        /* --- 3. 图标容器 --- */
         .icon-box {
-            width: 60px; height: 60px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
+            width: 56px; height: 56px;
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid white;
+        }
+
+        /* --- 4. 3D 图标 (稍微调亮) --- */
+        .icon-3d {
+            filter: drop-shadow(0 15px 25px rgba(124, 58, 237, 0.15)); /* 紫色系投影 */
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* --- 5. 交互动效 --- */
+        .tap-bounce {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+        }
+        .tap-bounce:active {
+            transform: scale(0.96);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .tap-bounce:active .icon-3d {
+            transform: scale(0.9) rotate(5deg) translateY(5px);
+        }
+
+        .date-widget {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 13px;
+            color: #94A3B8; /* 浅灰 */
+            margin-bottom: 8px;
         }
         
-        .c-dinner { background: #FFF3E0; } /* 浅橙 */
-        .c-chef { background: #E3F2FD; }   /* 浅蓝 */
-
-        .info h2 { margin: 0; font-size: 18px; font-weight: 600; }
-        .info span { font-size: 13px; color: var(--sub-text); display: block; margin-top: 4px; }
-
-        .arrow { margin-left: auto; color: #D1D1D6; font-size: 20px; font-weight: bold; }
+        .footer-text {
+            font-size: 11px;
+            color: #CBD5E1;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
     </style>
 </head>
-<body>
+<body class="flex flex-col px-6 py-12 safe-area-pt">
 
-    <div class="header">
-        <h1>🛠️ 我的工具箱</h1>
-        <p>Personal Utilities Hub</p>
+    <!-- 背景层 -->
+    <div class="aurora-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
 
-    <div class="grid">
-        <a href="dinner/" class="card">
-            <div class="icon-box c-dinner">🥗</div>
-            <div class="info">
-                <h2>晚餐决策助手</h2>
-                <span>解决“今晚吃什么”世纪难题</span>
+    <!-- 头部 -->
+    <header class="mt-12 mb-10">
+        <div class="date-widget" id="date-display">MONDAY, NOVEMBER 24</div>
+        <h1 class="text-4xl font-extrabold tracking-tight text-slate-800">
+            我的工具箱
+        </h1>
+    </header>
+
+    <!-- Grid 布局 -->
+    <div class="grid grid-cols-1 gap-6 w-full max-w-md mx-auto">
+
+        <!-- 卡片 1: 晚餐助手 -->
+        <a href="dinner/" class="ios-glass tap-bounce p-8 relative overflow-hidden group flex flex-row items-center justify-between h-48 no-underline">
+            <div class="relative z-10 flex flex-col justify-between h-full py-1">
+                <div class="icon-box text-emerald-500">
+                    🥗
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 leading-none mb-2">Dinner</h2>
+                    <p class="text-sm text-slate-500 font-medium">今天吃什么</p>
+                </div>
             </div>
-            <div class="arrow">›</div>
+            <!-- 右侧装饰大图标 -->
+            <div class="absolute -right-6 -bottom-6 w-48 h-48 flex items-center justify-center">
+                <!-- 换成了 3D 食物图标 (汉堡) -->
+                <img src="https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis@latest/Emojis/Food%20and%20drink/Hamburger/3D/hamburger_3d.png" class="icon-3d w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
+            </div>
         </a>
 
-        <a href="chef/" class="card">
-            <div class="icon-box c-chef">👨‍🍳</div>
-            <div class="info">
-                <h2>百年神厨点单</h2>
-                <span>一键生成工作日午餐菜单</span>
+        <!-- 卡片 2: 百年神厨 -->
+        <a href="chef/" class="ios-glass tap-bounce p-8 relative overflow-hidden group flex flex-row items-center justify-between h-48 no-underline">
+            <div class="relative z-10 flex flex-col justify-between h-full py-1">
+                <div class="icon-box text-violet-500">
+                    👨‍🍳
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 leading-none mb-2">Chef</h2>
+                    <p class="text-sm text-slate-500 font-medium">点餐神器</p>
+                </div>
             </div>
-            <div class="arrow">›</div>
+            <!-- 右侧装饰大图标 -->
+            <div class="absolute -right-8 -bottom-4 w-44 h-44 flex items-center justify-center">
+                <!-- 换成了 3D 厨师图标 -->
+                <img src="https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis@latest/Emojis/People/Cook%20Medium-Light%20Skin%20Tone/3D/cook_medium-light_skin_tone_3d.png" class="icon-3d w-full h-full object-contain transform group-hover:rotate-12 transition-transform duration-500">
+            </div>
         </a>
+
     </div>
 
+    <!-- 底部版权 -->
+    <footer class="mt-auto text-center pb-8">
+        <p class="footer-text">CLEAR GLASS EDITION</p>
+    </footer>
+
+    <script>
+        // 自动更新日期
+        const dateEl = document.getElementById('date-display');
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        dateEl.textContent = new Date().toLocaleDateString('en-US', options).toUpperCase();
+    </script>
 </body>
 </html>
