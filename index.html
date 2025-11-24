@@ -75,7 +75,8 @@
     <div class="flex flex-col gap-4 w-full max-w-md mx-auto">
 
         <!-- 卡片 1: 晚餐助手 -->
-        <a href=" " class="ios-card p-4 flex items-center gap-4 no-underline group">
+        <!-- 修复点：补充了 href 链接，并加上 index.html 后缀确保跳转 -->
+        <a href="dinner/index.html" class="ios-card p-4 flex items-center gap-4 no-underline group">
             <!-- 纯色背景容器 + SVG 图标 -->
             <div class="icon-squircle bg-blue-500">
                 <!-- SVG: Utensils (餐具) -->
@@ -86,16 +87,17 @@
             
             <div class="flex-1 flex flex-col justify-center">
                 <h2 class="text-lg font-semibold text-black leading-snug">WhatToEat</h2>
-                <p class="text-xs text-gray-500 font-medium line-clamp-1">解决今天吃什么的难题</p >
+                <p class="text-xs text-gray-500 font-medium line-clamp-1">解决今天吃什么的难题</p>
             </div>
             
             <div class="chevron">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </div>
-        </a >
+        </a>
 
         <!-- 卡片 2: 百年神厨 -->
-        <a href="chef/" class="ios-card p-4 flex items-center gap-4 no-underline group">
+        <!-- 修复点：补充 index.html 后缀 -->
+        <a href="chef/index.html" class="ios-card p-4 flex items-center gap-4 no-underline group">
             <div class="icon-squircle bg-emerald-500">
                 <!-- SVG: Chef Hat (厨师帽) -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -105,13 +107,13 @@
             
             <div class="flex-1 flex flex-col justify-center">
                 <h2 class="text-lg font-semibold text-black leading-snug">百年神厨</h2>
-                <p class="text-xs text-gray-500 font-medium line-clamp-1">工作午餐 · 精准控价</p >
+                <p class="text-xs text-gray-500 font-medium line-clamp-1">工作午餐 · 精准控价</p>
             </div>
             
             <div class="chevron">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </div>
-        </a >
+        </a>
 
         <!-- 占位卡片 (示例：未来扩展) -->
         <!-- 
@@ -126,7 +128,7 @@
     </div>
 
     <footer class="mt-auto text-center pb-8">
-        <p class="footer-text">PRO UTILITIES</p >
+        <p class="footer-text">PRO UTILITIES</p>
     </footer>
 
     <script>
