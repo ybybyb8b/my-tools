@@ -6,7 +6,7 @@
     <title>百年神厨 · 智能点餐</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- 现代极简设计系统 (Final + Swap) --- */
+        /* --- 现代极简设计系统 (Final + Swap V2) --- */
         :root {
             --bg-body: #F5F7FA;
             --text-primary: #111827;
@@ -84,6 +84,13 @@
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* 选中项样式 */
+        .swap-item-selected {
+            background-color: #ECFDF5 !important; /* 绿色背景 */
+            border-color: #10B981 !important;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
         .tag-budget { font-variant-numeric: tabular-nums; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
@@ -95,7 +102,6 @@
     <!-- Header -->
     <header class="mt-6 mb-8 flex justify-between items-center px-1">
         <div class="flex items-center gap-3">
-            <!-- 返回大厅按钮 -->
             <button onclick="location.href='../index.html'" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition">
                 🏠
             </button>
@@ -133,7 +139,6 @@
 
     <!-- 结果展示区 -->
     <div id="result-area" class="hidden">
-        
         <!-- 数据概览 -->
         <div class="grid grid-cols-2 gap-4 mb-6 animate-enter" style="animation-delay: 0ms">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100/50 flex flex-col justify-between h-24">
@@ -160,7 +165,6 @@
                     </button>
                 </div>
             </div>
-            
             <div id="menu-list" class="divide-y divide-gray-50"></div>
         </div>
     </div>
@@ -183,17 +187,32 @@
         </div>
     </div>
 
-    <!-- 替换菜品弹窗 (新增) -->
-    <dialog id="swapModal" class="rounded-2xl shadow-2xl p-0 w-full max-w-sm bg-white backdrop:bg-black/50">
-        <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="font-bold text-gray-800">选择替换菜品</h3>
-            <button onclick="closeSwapModal()" class="text-gray-400 hover:text-gray-600 p-1 text-2xl leading-none">&times;</button>
-        </div>
-        <div id="swap-list" class="max-h-[60vh] overflow-y-auto p-2 divide-y divide-gray-50">
-            <!-- 候选列表 -->
-        </div>
-        <div class="p-3 bg-gray-50 text-center">
-            <span class="text-xs text-gray-400">仅显示符合类型、S码限制且不重复的菜品</span>
+    <!-- 替换菜品弹窗 (V3.2 升级版) -->
+    <dialog id="swapModal" class="rounded-2xl shadow-2xl p-0 w-full max-w-sm bg-white backdrop:bg-black/50 h-[80vh]">
+        <div class="flex flex-col h-full">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-100 bg-white sticky top-0 z-10">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-800 text-lg">替换菜品</h3>
+                    <button onclick="closeSwapModal()" class="text-gray-400 hover:text-gray-600 p-1 text-2xl leading-none">&times;</button>
+                </div>
+                <!-- 类型筛选器 -->
+                <div class="flex gap-2 overflow-x-auto no-scrollbar" id="swap-filter-container">
+                    <!-- JS 动态生成 -->
+                </div>
+            </div>
+
+            <!-- List -->
+            <div id="swap-list" class="flex-1 overflow-y-auto p-2 divide-y divide-gray-50">
+                <!-- 候选列表 -->
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <button id="confirmSwapBtn" onclick="confirmSwap()" disabled class="w-full h-12 rounded-xl bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-200 disabled:opacity-50 disabled:shadow-none transition-all flex items-center justify-center gap-2">
+                    <span>确认替换</span>
+                </button>
+            </div>
         </div>
     </dialog>
 
@@ -207,8 +226,9 @@
     /* ================= 核心逻辑 ================= */
     let db = [];
     let hist = [];
-    let best = null; // 当前方案 {m: [], p: 0}
-    let currentSwapIndex = -1; // 当前正在替换的索引
+    let best = null;
+    let currentSwapIndex = -1;
+    let selectedSwapCandidate = null; // 临时存储选中的替换项
     const HIST_KEY = 'sz_hist_v10';
 
     async function init() {
@@ -294,14 +314,12 @@
 
     function shuffle(a) { return a.sort(()=>Math.random()-0.5); }
 
-    /* ================= 生成逻辑 ================= */
     function generate() {
         const num = parseInt(document.getElementById('pCount').value);
         if(num<2) { showToast("至少2人用餐"); return; }
 
         const tables = Math.ceil(num/11);
         const pPerT = Math.ceil(num/tables);
-        
         const limitMax = pPerT * 35;      
         const limitIdealMin = pPerT * 29; 
         const limitIdealMax = pPerT * 33; 
@@ -369,13 +387,9 @@
             if (p > limitMax) continue;
 
             let diff = 0;
-            if (p >= limitIdealMin && p <= limitIdealMax) {
-                diff = 0; 
-            } else if (p < limitIdealMin) {
-                diff = limitIdealMin - p;
-            } else {
-                diff = p - limitIdealMax;
-            }
+            if (p >= limitIdealMin && p <= limitIdealMax) { diff = 0; } 
+            else if (p < limitIdealMin) { diff = limitIdealMin - p; } 
+            else { diff = p - limitIdealMax; }
 
             if (diff < bestDiff) {
                 bestDiff = diff;
@@ -389,7 +403,6 @@
         render();
     }
 
-    /* ================= 渲染与手动替换逻辑 ================= */
     function render() {
         if(!best) return;
         document.getElementById('result-area').classList.remove('hidden');
@@ -399,11 +412,8 @@
         const pPerT = Math.ceil(num/tables);
         const limitIdeal = pPerT * 33; 
 
-        // 排序
         const ord = {"汤品":1,"主荤":2,"辅荤":3,"凉菜":4,"下饭菜":5,"素菜":6,"小吃":7};
         best.m.sort((a,b)=>(ord[a.type]||9)-(ord[b.type]||9));
-
-        // 重新计算总价
         best.p = best.m.reduce((sum, item) => sum + item.price, 0);
 
         const listEl = document.getElementById('menu-list');
@@ -420,7 +430,7 @@
                             <div class="text-gray-900 font-medium flex items-center">
                                 ${d.name} ${tag}
                             </div>
-                            <div class="text-xs text-gray-400 mt-0.5">${d.type}</div>
+                            <div class="text-xs text-gray-400 mt-0.5 text-gray-500">${d.type}</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
@@ -433,7 +443,6 @@
             `;
         }).join('');
 
-        // 更新价格显示
         document.getElementById('res-total').innerText = `¥${best.p.toFixed(0)}`;
         let avg = (best.p/pPerT).toFixed(0);
         let avgEl = document.getElementById('res-avg');
@@ -453,28 +462,71 @@
         document.getElementById('res-count').innerText = `${best.m.length} 道菜`;
     }
 
-    // --- 替换逻辑 ---
+    // --- 替换逻辑 V2 (增强版) ---
     function openSwapModal(index) {
         currentSwapIndex = index;
+        selectedSwapCandidate = null; // 重置选中
+        document.getElementById('confirmSwapBtn').disabled = true;
+        
         const currentDish = best.m[index];
         const modal = document.getElementById('swapModal');
-        const listContainer = document.getElementById('swap-list');
         
-        // 统计当前菜单有多少S码 (如果当前就是S，先减掉1，便于判断能不能换成S)
-        const currentSCount = best.m.filter(d => d.size === 'S').length - (currentDish.size === 'S' ? 1 : 0);
+        // 1. 准备筛选器
+        const filterContainer = document.getElementById('swap-filter-container');
+        // 获取所有可用类型
+        const allTypes = [...new Set(db.map(d => d.type))];
+        // 当前菜的类型优先
+        const currentType = currentDish.type;
+        
+        // 生成筛选按钮
+        filterContainer.innerHTML = `
+            <button onclick="renderSwapList('All')" class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap transition-colors hover:bg-gray-200" data-type="All">全部</button>
+            ${allTypes.map(t => `
+                <button onclick="renderSwapList('${t}')" class="filter-chip px-3 py-1 rounded-full text-xs font-medium ${t === currentType ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'} whitespace-nowrap transition-colors hover:bg-gray-200" data-type="${t}">${t}</button>
+            `).join('')}
+        `;
 
-        // 筛选候选菜
-        // 规则：同类型、不在当前菜单中、不互斥、符合S码规则
+        // 2. 渲染列表 (默认选中当前类型)
+        renderSwapList(currentType);
+        
+        modal.showModal();
+    }
+
+    function renderSwapList(filterType) {
+        const listContainer = document.getElementById('swap-list');
+        const currentDish = best.m[currentSwapIndex];
+        
+        // 更新按钮样式
+        document.querySelectorAll('.filter-chip').forEach(btn => {
+            if(btn.dataset.type === filterType) {
+                btn.className = "filter-chip px-3 py-1 rounded-full text-xs font-medium bg-black text-white whitespace-nowrap transition-colors";
+            } else {
+                btn.className = "filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap transition-colors hover:bg-gray-200";
+            }
+        });
+
+        // 核心逻辑：筛选候选菜
+        // 规则：不重复、不互斥、S码限制
+        const currentSCount = best.m.filter(d => d.size === 'S').length - (currentDish.size === 'S' ? 1 : 0);
+        
         let candidates = db.filter(d => {
-            if (d.type !== currentDish.type) return false; // 必须同类型
-            if (best.m.some(m => m.name === d.name)) return false; // 不能已存在
-            if (d.mutex && best.m.some(m => m.mutex === d.mutex && m.name !== currentDish.name)) return false; // 互斥检查
-            if (d.size === 'S' && currentSCount >= 1) return false; // S码检查
+            // 类型筛选
+            if (filterType !== 'All' && d.type !== filterType) return false;
+            
+            // 基础规则
+            if (best.m.some(m => m.name === d.name)) return false; // 不重复
+            if (d.mutex && best.m.some(m => m.mutex === d.mutex && m.name !== currentDish.name)) return false; // 不冲突
+            if (d.size === 'S' && currentSCount >= 1) return false; // S码限制
             return true;
         });
 
-        // 排序：价格接近的排前面
-        candidates.sort((a, b) => Math.abs(a.price - currentDish.price) - Math.abs(b.price - currentDish.price));
+        // 排序：默认按价格排序
+        candidates.sort((a, b) => a.price - b.price);
+
+        if (candidates.length === 0) {
+            listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">没有符合条件的菜品</div>`;
+            return;
+        }
 
         listContainer.innerHTML = candidates.map(d => {
             const diff = d.price - currentDish.price;
@@ -486,35 +538,49 @@
             else if(d.size === 'S') tag = `<span class="ml-1 px-1 py-0.5 rounded text-[9px] bg-blue-50 text-blue-500">小</span>`;
 
             return `
-                <div onclick="doSwap('${d.name}')" class="p-3 flex justify-between items-center hover:bg-gray-50 cursor-pointer rounded-xl active:bg-gray-100">
+                <div onclick="selectCandidate('${d.name}', this)" class="swap-item p-3 flex justify-between items-center hover:bg-gray-50 cursor-pointer rounded-xl active:bg-gray-100 border border-transparent transition-all mb-1">
                     <div>
-                        <div class="font-medium text-gray-800 flex items-center">${d.name} ${tag}</div>
-                        <div class="text-xs text-gray-400">¥${d.price}</div>
+                        <div class="font-medium text-gray-800 flex items-center">
+                            ${d.name} ${tag}
+                        </div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="text-xs text-gray-400 px-1.5 py-0.5 bg-gray-100 rounded">${d.type}</span>
+                            <span class="text-xs text-gray-500">¥${d.price}</span>
+                        </div>
                     </div>
                     <div class="text-xs font-bold ${diffColor}">${diffStr}</div>
                 </div>
             `;
         }).join('');
+    }
 
-        if (candidates.length === 0) {
-            listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 text-sm">没有符合条件的替换项</div>`;
+    function selectCandidate(name, el) {
+        selectedSwapCandidate = name;
+        
+        // UI 更新
+        document.querySelectorAll('.swap-item').forEach(item => {
+            item.classList.remove('swap-item-selected');
+        });
+        el.classList.add('swap-item-selected');
+        
+        // 启用确认按钮
+        document.getElementById('confirmSwapBtn').disabled = false;
+    }
+
+    function confirmSwap() {
+        if (selectedSwapCandidate && currentSwapIndex !== -1) {
+            const newDish = db.find(d => d.name === selectedSwapCandidate);
+            if (newDish) {
+                best.m[currentSwapIndex] = newDish;
+                render();
+                showToast(`已替换为: ${newDish.name}`);
+                closeSwapModal();
+            }
         }
-
-        modal.showModal();
     }
 
     function closeSwapModal() {
         document.getElementById('swapModal').close();
-    }
-
-    function doSwap(newName) {
-        const newDish = db.find(d => d.name === newName);
-        if (newDish && currentSwapIndex !== -1) {
-            best.m[currentSwapIndex] = newDish; // 替换
-            render(); // 重新渲染（会自动重算价格）
-            showToast(`已替换为: ${newDish.name}`);
-            closeSwapModal();
-        }
     }
 
     // --- 基础功能 ---
@@ -550,7 +616,6 @@
         setTimeout(() => t.classList.add('opacity-0', '-translate-y-4'), 2000);
     }
 
-    // 点击模态框外部关闭
     document.getElementById('swapModal').addEventListener('click', (e) => {
         const rect = e.target.getBoundingClientRect();
         if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
