@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>今天吃什么</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide 图标库 -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* --- V5.1 Clean Minimalist (Icon Edition) --- */
+        /* --- V5.2 Real Utility Edition --- */
         :root {
             --bg-body: #F8FAFC;       
             --text-main: #0F172A;     
@@ -25,7 +24,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- 页面容器 --- */
         .step-container {
             position: absolute; inset: 0;
             padding: 24px;
@@ -39,7 +37,6 @@
         .step-container.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
         .step-container.prev { opacity: 0; transform: translateY(-20px) scale(0.98); pointer-events: none; }
 
-        /* --- 极简白卡片 (Clean Card) --- */
         .clean-card {
             background: var(--card-bg);
             border-radius: 24px; 
@@ -47,48 +44,38 @@
             border: 1px solid rgba(241, 245, 249, 1); 
             transition: all 0.2s;
         }
-        .clean-card:active {
-            transform: scale(0.98);
-            background: #F1F5F9;
-        }
+        .clean-card:active { transform: scale(0.98); background: #F1F5F9; }
 
-        /* --- 图标容器 (Icon Box) --- */
         .icon-box {
-            width: 56px; height: 56px;
-            border-radius: 16px;
+            width: 56px; height: 56px; border-radius: 16px;
             display: flex; align-items: center; justify-content: center;
             transition: transform 0.2s;
         }
         .clean-card:active .icon-box { transform: scale(0.9); }
 
-        /* 颜色变体 */
         .bg-orange-soft { background-color: #FFF7ED; color: #EA580C; }
         .bg-purple-soft { background-color: #FAF5FF; color: #9333EA; }
         .bg-blue-soft { background-color: #EFF6FF; color: #2563EB; }
         .bg-green-soft { background-color: #F0FDF4; color: #16A34A; }
         .bg-gray-soft { background-color: #F3F4F6; color: #4B5563; }
 
-        /* --- 底部悬浮胶囊 --- */
         .floating-capsule {
             position: fixed; bottom: 40px; left: 24px; right: 24px;
-            background: #FFFFFF;
-            border-radius: 24px;
-            padding: 8px;
+            background: #FFFFFF; border-radius: 24px; padding: 8px;
             display: flex; justify-content: space-between; align-items: center;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            z-index: 50; 
-            padding-bottom: calc(8px + env(safe-area-inset-bottom));
+            z-index: 50; padding-bottom: calc(8px + env(safe-area-inset-bottom));
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 标签样式 */
         .tag-pill {
             background: #F1F5F9; color: #475569;
             font-size: 12px; font-weight: 600;
             padding: 4px 12px; border-radius: 100px;
+            border: 1px solid #E2E8F0;
         }
     </style>
 </head>
@@ -96,6 +83,7 @@
 
     <!-- 顶部导航 -->
     <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50 pointer-events-none pt-[calc(env(safe-area-inset-top)+20px)]">
+        <!-- Home -->
         <button id="nav-btn" onclick="handleNavClick()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 cursor-pointer pointer-events-auto text-slate-600 active:bg-slate-50 transition">
             <i data-lucide="home" class="w-5 h-5"></i>
         </button>
@@ -105,9 +93,9 @@
             DECIDER
         </div>
 
-        <!-- Avatar -->
-        <div class="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shadow-sm pointer-events-auto flex items-center justify-center text-slate-400">
-             <i data-lucide="user" class="w-5 h-5"></i>
+        <!-- 状态指示器 (替换了假头像) -->
+        <div id="db-status" class="px-3 py-1.5 bg-white/80 backdrop-blur rounded-full border border-slate-200 shadow-sm text-[10px] font-bold text-slate-400 tracking-wide pointer-events-auto">
+            ...
         </div>
     </div>
 
@@ -124,9 +112,7 @@
             <div class="grid grid-cols-1 gap-4">
                 <div onclick="selectContext('shared')" class="clean-card p-5 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-5">
-                        <div class="icon-box bg-orange-soft">
-                            <i data-lucide="users" class="w-7 h-7"></i>
-                        </div>
+                        <div class="icon-box bg-orange-soft"><i data-lucide="users" class="w-7 h-7"></i></div>
                         <div>
                             <h3 class="text-lg font-bold text-slate-800">二人食</h3>
                             <p class="text-xs text-slate-400 mt-0.5 font-medium">Shared Meal</p>
@@ -137,9 +123,7 @@
 
                 <div onclick="selectContext('solo')" class="clean-card p-5 flex items-center justify-between cursor-pointer group">
                     <div class="flex items-center gap-5">
-                        <div class="icon-box bg-purple-soft">
-                            <i data-lucide="user" class="w-7 h-7"></i>
-                        </div>
+                        <div class="icon-box bg-purple-soft"><i data-lucide="user" class="w-7 h-7"></i></div>
                         <div>
                             <h3 class="text-lg font-bold text-slate-800">自己独享</h3>
                             <p class="text-xs text-slate-400 mt-0.5 font-medium">Solo Dining</p>
@@ -159,17 +143,13 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div onclick="selectMode('takeout')" class="clean-card p-5 flex flex-col items-center justify-center text-center h-44 cursor-pointer">
-                    <div class="icon-box bg-blue-soft mb-4">
-                        <i data-lucide="bike" class="w-8 h-8"></i>
-                    </div>
+                    <div class="icon-box bg-blue-soft mb-4"><i data-lucide="bike" class="w-8 h-8"></i></div>
                     <h3 class="text-base font-bold text-slate-800">点外卖</h3>
                     <p class="text-[10px] text-slate-400 mt-1">Delivery</p>
                 </div>
 
                 <div onclick="selectMode('cook')" class="clean-card p-5 flex flex-col items-center justify-center text-center h-44 cursor-pointer">
-                    <div class="icon-box bg-green-soft mb-4">
-                        <i data-lucide="chef-hat" class="w-8 h-8"></i>
-                    </div>
+                    <div class="icon-box bg-green-soft mb-4"><i data-lucide="chef-hat" class="w-8 h-8"></i></div>
                     <h3 class="text-base font-bold text-slate-800">自己煮</h3>
                     <p class="text-[10px] text-slate-400 mt-1">Home Cook</p>
                 </div>
@@ -179,20 +159,20 @@
         <!-- STEP 3: 类型确认 (自煮) -->
         <div class="step-container" id="step-3">
             <div class="flex flex-col h-full justify-center items-center text-center pb-20">
-                <h2 class="text-slate-400 font-bold tracking-widest uppercase text-xs mb-8">TODAY'S THEME</h2>
+                <h2 class="text-slate-400 font-bold tracking-widest uppercase text-xs mb-8">SELECTED TYPE</h2>
                 
                 <div class="clean-card w-full p-10 flex flex-col items-center relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-10 -mt-10 -z-10"></div>
                     
                     <div class="w-24 h-24 bg-gray-soft rounded-full flex items-center justify-center mb-6 shadow-sm">
-                        <!-- 这里的图标会动态替换 -->
                         <i id="type-icon-disp" data-lucide="utensils" class="w-12 h-12 text-slate-700"></i>
                     </div>
                     
                     <h1 class="text-3xl font-black text-slate-900 mb-2 tracking-tight" id="type-name-disp">炒菜</h1>
-                    <div class="flex justify-center gap-2 mt-4">
-                        <span class="tag-pill">健康</span>
-                        <span class="tag-pill">家常</span>
+                    
+                    <!-- 动态标签容器 -->
+                    <div class="flex justify-center gap-2 mt-4" id="type-tags-disp">
+                        <!-- 标签将由 JS 插入 -->
                     </div>
                 </div>
             </div>
@@ -243,23 +223,18 @@
     let STATE = { context: null, mode: null, cookType: null, currentResult: null, step: 1 };
     const HIST_KEY = "dinner_app_history";
 
-    // 图标映射 (使用 Lucide 图标名)
+    // --- 自定义类型元数据 (您可以在这里修改标签和麻烦指数) ---
+    const TYPE_META = {
+        "水煮菜": { tag: "健康", star: 4, icon: "soup" },
+        "炒菜": { tag: "美味", star: 3, icon: "utensils-crossed" },
+        "方便菜": { tag: "省事", star: 2, icon: "box" },
+        "焖菜": { tag: "健康", star: 3, icon: "package-open" },
+        "火锅": { tag: "菜式丰富", star: 5, icon: "flame" },
+        "速食": { tag: "省事", star: 1, icon: "zap" }
+    };
+
     const ICON_MAP = {
-        "types": { 
-            "火锅": "flame", 
-            "水煮菜": "soup", 
-            "炒菜": "utensils-crossed", 
-            "焖菜": "package-open", 
-            "速食": "zap", 
-            "方便菜": "box", 
-            "default": "utensils" 
-        },
-        "results": { 
-            "takeout": "shopping-bag", 
-            "meat": "beef", 
-            "main": "utensils-crossed", 
-            "noodle": "soup" 
-        }
+        "results": { "takeout": "shopping-bag", "meat": "beef", "main": "utensils-crossed", "noodle": "soup" }
     };
 
     // 备份数据
@@ -289,11 +264,24 @@
             const response = await fetch('menu_data.json?t=' + new Date().getTime());
             if (!response.ok) throw new Error("Fetch Failed");
             MENUS = await response.json();
+            updateStatus("ONLINE", "emerald");
         } catch (e) {
             console.warn("Using fallback data");
             MENUS = FALLBACK_DATA;
+            updateStatus("LOCAL", "slate");
         }
-        lucide.createIcons(); // 重新渲染图标
+        lucide.createIcons();
+    }
+
+    function updateStatus(text, color) {
+        const el = document.getElementById('db-status');
+        el.textContent = text;
+        el.className = `px-3 py-1.5 bg-white/80 backdrop-blur rounded-full border border-${color}-200 shadow-sm text-[10px] font-bold text-${color}-500 tracking-wide pointer-events-auto`;
+    }
+
+    // --- Helper: 获取星级字符串 ---
+    function getStarString(count) {
+        return "⭐".repeat(count);
     }
 
     // --- UI Helper ---
@@ -391,11 +379,19 @@
         STATE.cookType = type;
         document.getElementById('type-name-disp').innerText = type;
         
-        let iconName = ICON_MAP.types.default;
-        for(let key in ICON_MAP.types) { if(type.includes(key)) { iconName = ICON_MAP.types[key]; break; } }
+        // 从 META 获取图标和标签
+        const meta = TYPE_META[type] || { icon: "utensils", tag: "自制", star: 1 };
         
         const iconContainer = document.getElementById('type-icon-disp');
-        iconContainer.setAttribute('data-lucide', iconName);
+        iconContainer.setAttribute('data-lucide', meta.icon);
+        
+        // 渲染标签
+        const tagsContainer = document.getElementById('type-tags-disp');
+        tagsContainer.innerHTML = `
+            <span class="tag-pill">${meta.tag}</span>
+            <span class="tag-pill bg-orange-50 text-orange-600 border-orange-100">麻烦指数 ${getStarString(meta.star)}</span>
+        `;
+        
         refreshIcons();
     }
     function reRollType() {
@@ -419,19 +415,26 @@
         let choice = weightedRandom(list);
         for(let k=0; k<5; k++) { if(!isRecent(choice.item)) break; choice = weightedRandom(list); }
         
+        // 外卖文案：省事 · 麻烦指数 ⭐
         renderUI("外卖", choice.item, `
             <div class="w-20 h-20 bg-blue-soft rounded-full flex items-center justify-center mb-6 mx-auto">
                 <i data-lucide="${ICON_MAP.results.takeout}" class="w-10 h-10"></i>
             </div>
             <h2 class="text-2xl font-bold text-slate-900 mb-2 leading-tight">${choice.item}</h2>
-            <p class="text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full inline-block mt-2 text-[10px] border border-slate-100">预计 30 分钟送达</p>
+            <p class="text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full inline-block mt-2 text-[10px] border border-slate-100">
+                省事 · 麻烦指数 ⭐
+            </p>
         `);
     }
 
     function generateResultCook() {
         const type = STATE.cookType;
         const pools = MENUS.pools;
+        const meta = TYPE_META[type] || { icon: "utensils", tag: "", star: 1 };
         let main = "", html = "";
+
+        // 构建结果页的副标题 (标签)
+        const subTitle = `${meta.tag} · 麻烦指数 ${getStarString(meta.star)}`;
 
         if (type.includes('火锅') || type.includes('水煮')) {
             let meat = multiRandomUnique(pools.huncai, 1)[0];
@@ -443,7 +446,7 @@
                     <i data-lucide="${ICON_MAP.results.meat}" class="w-10 h-10"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-900 mb-1">${meat}</h2>
-                <p class="text-slate-400 text-xs mb-6 font-bold uppercase tracking-wider">${type}</p>
+                <p class="text-slate-400 text-[10px] mb-6 font-bold uppercase tracking-wider">${type} | ${subTitle}</p>
                 <div class="w-full bg-slate-50 rounded-xl p-4 text-left border border-slate-100">
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">配菜建议</span>
                     <p class="text-slate-600 mt-1 text-sm font-medium leading-relaxed">${multiRandomUnique(pools.yecai, 1)[0]}、${v}</p>
@@ -455,6 +458,9 @@
             html = `
                 <div class="w-16 h-16 bg-orange-soft rounded-full flex items-center justify-center mb-4 mx-auto">
                     <i data-lucide="${ICON_MAP.results.main}" class="w-8 h-8"></i>
+                </div>
+                <div class="text-center mb-4">
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">${subTitle}</p>
                 </div>
                 <div class="space-y-3 w-full">
                     <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left flex items-center justify-between">
@@ -491,10 +497,10 @@
                     <i data-lucide="${iconName}" class="w-10 h-10"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-slate-900 leading-tight px-2">${main}</h2>
-                <p class="text-xs text-slate-400 mt-4 bg-slate-50 px-3 py-1 rounded-full inline-block font-medium">美味即享</p>
+                <p class="text-xs text-slate-400 mt-4 bg-slate-50 px-3 py-1 rounded-full inline-block font-medium">${subTitle}</p>
             `;
         }
-        renderUI(type || "外卖", main, html);
+        renderUI("👨‍🍳", type, main, html);
     }
 
     function renderUI(modeText, resultName, contentHTML) {
