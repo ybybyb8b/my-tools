@@ -6,7 +6,7 @@
     <title>百年神厨 · 智能点餐</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- 现代极简设计系统 (Final + Swap V2) --- */
+        /* --- 现代极简设计系统 (Final + Precision Fix) --- */
         :root {
             --bg-body: #F5F7FA;
             --text-primary: #111827;
@@ -143,13 +143,13 @@
         <div class="grid grid-cols-2 gap-4 mb-6 animate-enter" style="animation-delay: 0ms">
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100/50 flex flex-col justify-between h-24">
                 <div class="text-xs text-gray-400 font-bold uppercase tracking-wide">总预算</div>
-                <div class="text-2xl font-bold text-gray-900 tag-budget" id="res-total">¥0</div>
+                <div class="text-2xl font-bold text-gray-900 tag-budget" id="res-total">¥0.0</div>
             </div>
             <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100/50 flex flex-col justify-between h-24 relative overflow-hidden">
                 <div class="absolute right-0 top-0 w-16 h-16 bg-current opacity-5 rounded-full -mr-4 -mt-4" id="res-bg-blob"></div>
                 <div class="text-xs text-gray-400 font-bold uppercase tracking-wide">人均 (目标 29-33)</div>
                 <div class="text-2xl font-bold tag-budget flex items-baseline gap-1" id="res-avg-container">
-                    <span id="res-avg">¥0</span>
+                    <span id="res-avg">¥0.0</span>
                 </div>
             </div>
         </div>
@@ -187,7 +187,7 @@
         </div>
     </div>
 
-    <!-- 替换菜品弹窗 (V3.2 升级版) -->
+    <!-- 替换菜品弹窗 -->
     <dialog id="swapModal" class="rounded-2xl shadow-2xl p-0 w-full max-w-sm bg-white backdrop:bg-black/50 h-[80vh]">
         <div class="flex flex-col h-full">
             <!-- Header -->
@@ -443,8 +443,9 @@
             `;
         }).join('');
 
-        document.getElementById('res-total').innerText = `¥${best.p.toFixed(0)}`;
-        let avg = (best.p/pPerT).toFixed(0);
+        // --- 修复点：保留1位小数 ---
+        document.getElementById('res-total').innerText = `¥${best.p.toFixed(1)}`;
+        let avg = (best.p/pPerT).toFixed(1);
         let avgEl = document.getElementById('res-avg');
         let box = document.getElementById('res-bg-blob');
         
@@ -462,7 +463,7 @@
         document.getElementById('res-count').innerText = `${best.m.length} 道菜`;
     }
 
-    // --- 替换逻辑 V2 (增强版) ---
+    // --- 替换逻辑 V3 ---
     function openSwapModal(index) {
         currentSwapIndex = index;
         selectedSwapCandidate = null; // 重置选中
@@ -473,12 +474,9 @@
         
         // 1. 准备筛选器
         const filterContainer = document.getElementById('swap-filter-container');
-        // 获取所有可用类型
         const allTypes = [...new Set(db.map(d => d.type))];
-        // 当前菜的类型优先
         const currentType = currentDish.type;
         
-        // 生成筛选按钮
         filterContainer.innerHTML = `
             <button onclick="renderSwapList('All')" class="filter-chip px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 whitespace-nowrap transition-colors hover:bg-gray-200" data-type="All">全部</button>
             ${allTypes.map(t => `
@@ -486,9 +484,8 @@
             `).join('')}
         `;
 
-        // 2. 渲染列表 (默认选中当前类型)
+        // 2. 渲染列表
         renderSwapList(currentType);
-        
         modal.showModal();
     }
 
@@ -496,7 +493,6 @@
         const listContainer = document.getElementById('swap-list');
         const currentDish = best.m[currentSwapIndex];
         
-        // 更新按钮样式
         document.querySelectorAll('.filter-chip').forEach(btn => {
             if(btn.dataset.type === filterType) {
                 btn.className = "filter-chip px-3 py-1 rounded-full text-xs font-medium bg-black text-white whitespace-nowrap transition-colors";
@@ -505,22 +501,16 @@
             }
         });
 
-        // 核心逻辑：筛选候选菜
-        // 规则：不重复、不互斥、S码限制
         const currentSCount = best.m.filter(d => d.size === 'S').length - (currentDish.size === 'S' ? 1 : 0);
         
         let candidates = db.filter(d => {
-            // 类型筛选
             if (filterType !== 'All' && d.type !== filterType) return false;
-            
-            // 基础规则
-            if (best.m.some(m => m.name === d.name)) return false; // 不重复
-            if (d.mutex && best.m.some(m => m.mutex === d.mutex && m.name !== currentDish.name)) return false; // 不冲突
-            if (d.size === 'S' && currentSCount >= 1) return false; // S码限制
+            if (best.m.some(m => m.name === d.name)) return false; 
+            if (d.mutex && best.m.some(m => m.mutex === d.mutex && m.name !== currentDish.name)) return false; 
+            if (d.size === 'S' && currentSCount >= 1) return false; 
             return true;
         });
 
-        // 排序：默认按价格排序
         candidates.sort((a, b) => a.price - b.price);
 
         if (candidates.length === 0) {
@@ -530,7 +520,7 @@
 
         listContainer.innerHTML = candidates.map(d => {
             const diff = d.price - currentDish.price;
-            const diffStr = diff > 0 ? `+${diff}` : `${diff}`;
+            const diffStr = diff > 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
             const diffColor = diff > 0 ? 'text-orange-500' : (diff < 0 ? 'text-emerald-500' : 'text-gray-400');
             
             let tag = '';
@@ -556,14 +546,8 @@
 
     function selectCandidate(name, el) {
         selectedSwapCandidate = name;
-        
-        // UI 更新
-        document.querySelectorAll('.swap-item').forEach(item => {
-            item.classList.remove('swap-item-selected');
-        });
+        document.querySelectorAll('.swap-item').forEach(item => item.classList.remove('swap-item-selected'));
         el.classList.add('swap-item-selected');
-        
-        // 启用确认按钮
         document.getElementById('confirmSwapBtn').disabled = false;
     }
 
@@ -627,3 +611,4 @@
 </script>
 </body>
 </html>
+
