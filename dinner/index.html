@@ -541,17 +541,19 @@
         }, 200);
     }
 
-    function generateResultCook() {
+function generateResultCook() {
         const type = STATE.cookType;
         const pools = MENUS.pools;
         let main = "", html = "";
 
-        // --- Fix 1: Correctly generate meat and veggies ---
         if (type.includes('火锅') || type.includes('水煮')) {
-            let meat = multiRandomUnique(pools.huncai, 1)[0];
-            for(let k=0; k<5; k++) { if(!isRecent(meat)) break; meat = multiRandomUnique(pools.huncai, 1)[0]; }
+            // 优化：从荤菜池里剔除最近吃过的
+            let meatPool = pools.huncai.filter(m => !isRecent(m));
+            if(meatPool.length === 0) meatPool = pools.huncai; // 降级
             
-            const vegCount = Math.floor(Math.random() * 2) + 3; // 3-4
+            let meat = multiRandomUnique(meatPool, 1)[0];
+            
+            const vegCount = Math.floor(Math.random() * 2) + 3; 
             const veggies = multiRandomUnique(pools.sucai, vegCount);
             const leafs = multiRandomUnique(pools.yecai, 2);
             const allSides = [...leafs, ...veggies].join('、');
@@ -571,8 +573,16 @@
                 </div>
             `;
         } else if (type === '炒菜') {
-            const mItem = weightedRandom(pools.zhuchao).item;
-            const sItem = weightedRandom(pools.fuchao).item;
+            // 优化：分别过滤主炒和副炒
+            let zhuchaoPool = pools.zhuchao.filter(i => !isRecent(i.item));
+            if(zhuchaoPool.length === 0) zhuchaoPool = pools.zhuchao;
+
+            let fuchaoPool = pools.fuchao.filter(i => !isRecent(i.item));
+            if(fuchaoPool.length === 0) fuchaoPool = pools.fuchao;
+
+            const mItem = weightedRandom(zhuchaoPool).item;
+            const sItem = weightedRandom(fuchaoPool).item;
+            
             main = mItem;
             html = `
                 <div class="space-y-4">
@@ -593,16 +603,21 @@
                 </div>
             `;
         } else {
-            // 焖菜/速食
              if(type === '焖菜') {
-                // --- Fix 2: MenCai Logic ---
                 const base = weightedRandom(pools.mencai).item;
-                let meat = multiRandomUnique(pools.huncai, 1)[0];
-                for(let k=0; k<5; k++) { if(!isRecent(`${base}焖${meat}`)) break; meat = multiRandomUnique(pools.huncai, 1)[0]; }
+                // 焖菜的肉也过滤一下
+                let meatPool = pools.huncai.filter(m => !isRecent(`${base}焖${m}`));
+                if(meatPool.length === 0) meatPool = pools.huncai;
+                
+                let meat = multiRandomUnique(meatPool, 1)[0];
                 main = `${base}焖${meat}`;
             } else {
                 let pool = type === '速食' ? pools.sushi : pools.fangbiancai;
-                main = weightedRandom(pool).item;
+                // 优化：速食/方便菜过滤
+                let cleanPool = pool.filter(i => !isRecent(i.item));
+                if(cleanPool.length === 0) cleanPool = pool;
+                
+                main = weightedRandom(cleanPool).item;
             }
             
             let icon = type === '焖菜' ? 'package-open' : 'zap';
@@ -627,20 +642,33 @@
         generateResultTakeout();
     }
 
-    function generateResultTakeout() {
-        const list = MENUS[STATE.context].takeout;
-        let choice = weightedRandom(list);
-        for(let k=0; k<5; k++) { if(!isRecent(choice.item)) break; choice = weightedRandom(list); }
+function generateResultTakeout() {
+        const fullList = MENUS[STATE.context].takeout;
+        
+        // --- 优化核心：先过滤，再随机 ---
+        // 1. 找出所有“最近没吃过”的选项
+        let candidates = fullList.filter(i => !isRecent(i.item));
+        
+        // 2. 如果候选池空了（说明你把列表里的全吃了一遍），就无奈降级回完整列表
+        if (candidates.length === 0) {
+            console.log("候选池已空，重置列表");
+            candidates = fullList; 
+        }
+
+        // 3. 从剩下的里面，依然按照权重随机
+        let choice = weightedRandom(candidates);
         
         STATE.currentResult = choice.item;
+        
+        // (UI部分保持原样，记得用我们刚才修复bug后的 div 版本)
         document.getElementById('takeout-result-card').innerHTML = `
             <div class="w-24 h-24 bg-blue-soft rounded-full flex items-center justify-center mb-6 mx-auto">
                 <i data-lucide="${ICON_MAP.results.takeout}" class="w-12 h-12"></i>
             </div>
             <h2 class="text-3xl font-bold text-slate-900 mb-2 leading-tight">${choice.item}</h2>
-            <p class="text-slate-400 font-medium bg-slate-50 px-3 py-1.5 rounded-full inline-flex items-center gap-1 mt-2 text-[11px] border border-slate-100">
+            <div class="text-slate-400 font-medium bg-slate-50 px-3 py-1.5 rounded-full inline-flex items-center gap-1 mt-2 text-[11px] border border-slate-100">
                 省事 · 麻烦指数 ${getStarSVG(1)}
-            </p>
+            </div>
         `;
         refreshIcons();
     }
