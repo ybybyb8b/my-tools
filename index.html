@@ -12,176 +12,124 @@
 
         body {
             font-family: var(--font-ios);
-            background-color: #F8FAFC; /* 极淡的灰白底色 */
-            color: #1E293B; /* 深蓝灰文字 */
+            background-color: #F2F2F7; /* iOS 系统灰背景 */
+            color: #000;
             min-height: 100vh;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- 1. 空气感流体背景 (Airy Aurora) --- */
-        .aurora-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            background: #F8FAFC;
-            overflow: hidden;
-        }
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px); /* 强模糊 */
-            opacity: 0.8;
-            animation: float 15s infinite ease-in-out alternate;
-        }
-        /* 配色：清新的淡彩 */
-        .orb-1 {
-            top: -10%; left: -10%; width: 70vw; height: 70vw;
-            background: #BAE6FD; /* Light Sky Blue */
-            animation-duration: 20s;
-        }
-        .orb-2 {
-            bottom: -10%; right: -10%; width: 80vw; height: 80vw;
-            background: #E9D5FF; /* Light Purple */
-            animation-duration: 25s;
-            animation-delay: -5s;
-        }
-        .orb-3 {
-            top: 40%; left: 30%; width: 50vw; height: 50vw;
-            background: #FECACA; /* Light Pink */
-            opacity: 0.6;
-            animation-duration: 18s;
-            animation-delay: -8s;
+        /* --- 1. 极简背景 (纯净版) --- */
+        .bg-gradient {
+            position: fixed; inset: 0; z-index: -1;
+            background: radial-gradient(circle at 50% -20%, #E0E7FF 0%, #F2F2F7 60%);
         }
 
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 50px) scale(1.1); }
-        }
-
-        /* --- 2. 清透水晶卡片 (Crystal Glass) --- */
-        .ios-glass {
-            background: rgba(255, 255, 255, 0.6); /* 60% 透明白 */
-            backdrop-filter: blur(20px) saturate(120%);
-            -webkit-backdrop-filter: blur(20px) saturate(120%);
-            border: 1px solid rgba(255, 255, 255, 0.8); /* 明显的白色高光边框 */
-            box-shadow: 
-                0 10px 30px -10px rgba(148, 163, 184, 0.4), /* 柔和的彩色投影 */
-                inset 0 0 20px rgba(255, 255, 255, 0.5); /* 内发光 */
-            border-radius: 32px;
-        }
-
-        /* --- 3. 图标容器 --- */
-        .icon-box {
-            width: 56px; height: 56px;
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 28px;
+        /* --- 2. iOS 原生质感卡片 --- */
+        .ios-card {
             background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid white;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s;
         }
-
-        /* --- 4. 3D 图标 (稍微调亮) --- */
-        .icon-3d {
-            filter: drop-shadow(0 15px 25px rgba(124, 58, 237, 0.15)); /* 紫色系投影 */
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* --- 5. 交互动效 --- */
-        .tap-bounce {
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
-        }
-        .tap-bounce:active {
+        .ios-card:active {
             transform: scale(0.96);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        .tap-bounce:active .icon-3d {
-            transform: scale(0.9) rotate(5deg) translateY(5px);
+            background: rgba(255, 255, 255, 0.5);
         }
 
+        /* 图标容器 */
+        .icon-squircle {
+            width: 48px; height: 48px;
+            border-radius: 12px; /* 经典的 iOS 连续曲率圆角 */
+            display: flex; align-items: center; justify-content: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 箭头 */
+        .chevron { color: #C7C7CC; }
+
+        /* 顶部日期 */
         .date-widget {
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 13px;
-            color: #94A3B8; /* 浅灰 */
-            margin-bottom: 8px;
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            font-size: 13px; color: #8E8E93; margin-bottom: 6px;
         }
         
-        .footer-text {
-            font-size: 11px;
-            color: #CBD5E1;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
+        .footer-text { font-size: 11px; color: #AEAEB2; letter-spacing: 1px; font-weight: 500; }
     </style>
 </head>
-<body class="flex flex-col px-6 py-12 safe-area-pt">
+<body class="flex flex-col px-5 py-12 safe-area-pt">
 
-    <!-- 背景层 -->
-    <div class="aurora-bg">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-        <div class="orb orb-3"></div>
-    </div>
+    <div class="bg-gradient"></div>
 
-    <!-- 头部 -->
-    <header class="mt-12 mb-10">
+    <header class="mt-10 mb-8 px-2">
         <div class="date-widget" id="date-display">MONDAY, NOVEMBER 24</div>
-        <h1 class="text-4xl font-extrabold tracking-tight text-slate-800">
-            我的工具箱
+        <h1 class="text-4xl font-bold tracking-tight text-black">
+            工具箱
         </h1>
     </header>
 
-    <!-- Grid 布局 -->
-    <div class="grid grid-cols-1 gap-6 w-full max-w-md mx-auto">
+    <!-- 列表式布局 (类似 iOS 设置) -->
+    <div class="flex flex-col gap-4 w-full max-w-md mx-auto">
 
         <!-- 卡片 1: 晚餐助手 -->
-        <a href="dinner/" class="ios-glass tap-bounce p-8 relative overflow-hidden group flex flex-row items-center justify-between h-48 no-underline">
-            <div class="relative z-10 flex flex-col justify-between h-full py-1">
-                <div class="icon-box text-emerald-500">
-                    🥗
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 leading-none mb-2">Dinner</h2>
-                    <p class="text-sm text-slate-500 font-medium">今天吃什么</p>
-                </div>
+        <a href=" " class="ios-card p-4 flex items-center gap-4 no-underline group">
+            <!-- 纯色背景容器 + SVG 图标 -->
+            <div class="icon-squircle bg-blue-500">
+                <!-- SVG: Utensils (餐具) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                </svg>
             </div>
-            <!-- 右侧装饰大图标 -->
-            <div class="absolute -right-6 -bottom-6 w-48 h-48 flex items-center justify-center">
-                <!-- 换成了 3D 食物图标 (汉堡) -->
-                <img src="https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis@latest/Emojis/Food%20and%20drink/Hamburger/3D/hamburger_3d.png" class="icon-3d w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500">
+            
+            <div class="flex-1 flex flex-col justify-center">
+                <h2 class="text-lg font-semibold text-black leading-snug">WhatToEat</h2>
+                <p class="text-xs text-gray-500 font-medium line-clamp-1">解决今天吃什么的难题</p >
             </div>
-        </a>
+            
+            <div class="chevron">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+        </a >
 
         <!-- 卡片 2: 百年神厨 -->
-        <a href="chef/" class="ios-glass tap-bounce p-8 relative overflow-hidden group flex flex-row items-center justify-between h-48 no-underline">
-            <div class="relative z-10 flex flex-col justify-between h-full py-1">
-                <div class="icon-box text-violet-500">
-                    👨‍🍳
-                </div>
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 leading-none mb-2">Chef</h2>
-                    <p class="text-sm text-slate-500 font-medium">点餐神器</p>
-                </div>
+        <a href="chef/" class="ios-card p-4 flex items-center gap-4 no-underline group">
+            <div class="icon-squircle bg-emerald-500">
+                <!-- SVG: Chef Hat (厨师帽) -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/><line x1="6" y1="17" x2="18" y2="17"/>
+                </svg>
             </div>
-            <!-- 右侧装饰大图标 -->
-            <div class="absolute -right-8 -bottom-4 w-44 h-44 flex items-center justify-center">
-                <!-- 换成了 3D 厨师图标 -->
-                <img src="https://cdn.jsdelivr.net/gh/Tarikul-Islam-Anik/Microsoft-3D-Fluent-Emojis@latest/Emojis/People/Cook%20Medium-Light%20Skin%20Tone/3D/cook_medium-light_skin_tone_3d.png" class="icon-3d w-full h-full object-contain transform group-hover:rotate-12 transition-transform duration-500">
+            
+            <div class="flex-1 flex flex-col justify-center">
+                <h2 class="text-lg font-semibold text-black leading-snug">百年神厨</h2>
+                <p class="text-xs text-gray-500 font-medium line-clamp-1">工作午餐 · 精准控价</p >
             </div>
-        </a>
+            
+            <div class="chevron">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+        </a >
+
+        <!-- 占位卡片 (示例：未来扩展) -->
+        <!-- 
+        <div class="ios-card p-4 flex items-center gap-4 opacity-50 grayscale">
+            <div class="icon-squircle bg-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="flex-1"><h2 class="text-lg font-semibold text-black">更多功能</h2></div>
+        </div> 
+        -->
 
     </div>
 
-    <!-- 底部版权 -->
     <footer class="mt-auto text-center pb-8">
-        <p class="footer-text">CLEAR GLASS EDITION</p>
+        <p class="footer-text">PRO UTILITIES</p >
     </footer>
 
     <script>
-        // 自动更新日期
         const dateEl = document.getElementById('date-display');
         const options = { weekday: 'long', month: 'long', day: 'numeric' };
         dateEl.textContent = new Date().toLocaleDateString('en-US', options).toUpperCase();
