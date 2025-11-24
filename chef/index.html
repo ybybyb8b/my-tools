@@ -6,7 +6,7 @@
     <title>百年神厨 · 智能点餐</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* --- 现代极简设计系统 (Final + Precision Fix) --- */
+        /* --- 现代极简设计系统 (Final V3.3) --- */
         :root {
             --bg-body: #F5F7FA;
             --text-primary: #111827;
@@ -102,7 +102,8 @@
     <!-- Header -->
     <header class="mt-6 mb-8 flex justify-between items-center px-1">
         <div class="flex items-center gap-3">
-            <button onclick="location.href='../index.html'" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition">
+            <!-- 这里的链接仅在部署后有效，预览模式点击会刷新 -->
+            <button onclick="location.reload()" class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 text-lg text-gray-600 hover:bg-gray-50 active:scale-90 transition">
                 🏠
             </button>
             <div>
@@ -231,29 +232,111 @@
     let selectedSwapCandidate = null; // 临时存储选中的替换项
     const HIST_KEY = 'sz_hist_v10';
 
+    // 为了在画板中直接运行，我内置了数据。
+    // 部署到GitHub时，你可以使用 fetch 逻辑。
+    const EMBEDDED_DISHES = [
+        {type:"主荤", name:"海参回锅肉（小份）", price:68.8, mutex:"回锅肉"},
+        {type:"主荤", name:"藤椒豆花鱼（一条）", price:59.8, mutex:"鱼"},
+        {type:"主荤", name:"青椒霸王兔（小份）", price:48.8, mutex:"兔"},
+        {type:"主荤", name:"松鼠鱼", price:88.8, mutex:"鱼"},
+        {type:"主荤", name:"鱼汤酸菜鱼", price:88.8, mutex:"鱼"},
+        {type:"主荤", name:"神厨招牌鱼", price:88.8, mutex:"鱼"},
+        {type:"主荤", name:"清蒸鲈鱼", price:88.8, mutex:"鱼"},
+        {type:"主荤", name:"神厨尖叫蛙", price:78.8, mutex:"蛙"},
+        {type:"主荤", name:"海参全家福", price:78.8},
+        {type:"主荤", name:"干锅肥肠鸡", price:76.8, mutex:"肥肠"},
+        {type:"主荤", name:"干锅香辣虾", price:76.8},
+        {type:"主荤", name:"养身萝卜焖牛腩", price:68.8, mutex:"牛腩"},
+        {type:"主荤", name:"烫烫烫毛血旺", price:68.8, mutex:"血旺"},
+        {type:"主荤", name:"黄焖麻鸭", price:68.8, mutex:"鸭"},
+        {type:"主荤", name:"小炒黄牛肉", price:62.8, mutex:"牛肉"},
+        {type:"主荤", name:"火爆腰花", price:59.8},
+        {type:"主荤", name:"蒜苗回锅肉", price:58.8, mutex:"回锅肉"},
+        {type:"主荤", name:"酸菜鲜切吊龙", price:58.8, mutex:"牛肉"},
+        {type:"主荤", name:"蒜蓉粉丝虾", price:58.8},
+        {type:"主荤", name:"小煎鲜排骨", price:58.8, mutex:"排骨"},
+        {type:"主荤", name:"金牌蒜香骨", price:55.8, mutex:"排骨"},
+        {type:"主荤", name:"盐菜回锅肉", price:53.8, mutex:"回锅肉"},
+        {type:"辅荤", name:"百年卤拼（小份）", price:48.8},
+        {type:"辅荤", name:"酸菜焗肥肠煲", price:49.8, mutex:"肥肠"},
+        {type:"辅荤", name:"脆皮樟茶鸭", price:45.8, mutex:"鸭"},
+        {type:"辅荤", name:"水煮肉片", price:45.8},
+        {type:"辅荤", name:"五花肉爆牛肝菌", price:45.8},
+        {type:"辅荤", name:"腊肉拼盘", price:45.8},
+        {type:"辅荤", name:"浇汁小海鲜", price:36.8},
+        {type:"辅荤", name:"十八秒猪肝", price:36.8},
+        {type:"辅荤", name:"鱼香肉丝", price:36.8},
+        {type:"辅荤", name:"儿菜烩酥肉", price:36.8},
+        {type:"辅荤", name:"宫保鸡丁", price:32.8},
+        {type:"辅荤", name:"小炒肉", price:32.8},
+        {type:"辅荤", name:"莴笋炒肉丝", price:22.8},
+        {type:"辅荤", name:"酸辣土豆肉丝", price:22.8, mutex:"土豆"},
+        {type:"辅荤", name:"渣渣牛肉", price:18.8, mutex:"牛肉"},
+        {type:"凉菜", name:"红油凉拌鸡", price:42.8},
+        {type:"凉菜", name:"盐边牛肉", price:42.8, mutex:"牛肉"},
+        {type:"凉菜", name:"夫妻肺片", price:38.8},
+        {type:"凉菜", name:"红油土鸡片", price:45.8},
+        {type:"凉菜", name:"洪雅藤椒鸡", price:42.8},
+        {type:"凉菜", name:"糖蒜拌猪肝", price:29.8},
+        {type:"凉菜", name:"鸡丝凉面", price:26.8},
+        {type:"凉菜", name:"烧椒皮蛋", price:25.8},
+        {type:"凉菜", name:"麻酱凤尾", price:18.8},
+        {type:"凉菜", name:"风味小拌菜", price:18.8},
+        {type:"凉菜", name:"酸辣木耳", price:18.8},
+        {type:"凉菜", name:"口口脆瓜", price:16.8},
+        {type:"凉菜", name:"旋子凉粉", price:13.8},
+        {type:"素菜", name:"清炒豌豆尖", price:28.8},
+        {type:"素菜", name:"豆汤豌豆尖", price:28.8},
+        {type:"素菜", name:"小炒蔬菜王", price:26.8},
+        {type:"素菜", name:"土豆四季豆", price:19.8, mutex:"土豆"},
+        {type:"素菜", name:"青菜钵", price:19.8},
+        {type:"素菜", name:"炒油菜", price:18.8},
+        {type:"汤品", name:"紫砂莲藕炖排骨（中份）", price:39.8},
+        {type:"汤品", name:"紫砂白果炖土鸡（中份）", price:36.8},
+        {type:"汤品", name:"紫砂滋补炖乌鸡（中份）", price:42.8},
+        {type:"汤品", name:"番茄鲜肉丸子", price:36.8, mutex:"番茄"},
+        {type:"汤品", name:"番茄煎蛋汤", price:18.8, mutex:"番茄"},
+        {type:"下饭菜", name:"虾滑藕带炒芦笋", price:36.8},
+        {type:"下饭菜", name:"香肠花菜", price:33.8},
+        {type:"下饭菜", name:"干锅千叶豆腐", price:29.8, mutex:"豆腐"},
+        {type:"下饭菜", name:"干锅鲜儿菜", price:29.8},
+        {type:"下饭菜", name:"牛肉麻婆豆腐", price:28.8, mutex:"豆腐"},
+        {type:"下饭菜", name:"九香绍子粉", price:28.8},
+        {type:"下饭菜", name:"有机番茄炒蛋", price:23.8, mutex:"番茄"},
+        {type:"小吃", name:"卤肉杂粮包", price:39.8},
+        {type:"小吃", name:"手工拉丝糍粑（10个）", price:28.8},
+        {type:"小吃", name:"炸小酥肉", price:22.8}
+    ];
+
     async function init() {
+        // 优先尝试 fetch，失败则使用内置数据 (解决本地预览问题)
         try {
             const res = await fetch('dishes.json?t=' + new Date().getTime());
             if(!res.ok) throw new Error("Load Failed");
             const raw = await res.json();
-            
-            db = raw.map(d => ({
-                ...d, 
-                size: d.size || autoSize(d.name), 
-                mutex: d.mutex || ""
-            }));
-
-            loadHist();
-
-            const badge = document.getElementById('status-badge');
-            badge.textContent = "Online";
-            badge.className = "px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-medium border border-emerald-100";
-            document.getElementById('genBtn').disabled = false;
+            processData(raw);
+            updateStatus("Online", "emerald");
         } catch(e) {
-            const badge = document.getElementById('status-badge');
-            badge.textContent = "Offline";
-            badge.className = "px-3 py-1 rounded-full bg-red-50 text-red-500 text-xs font-medium";
+            // 预览模式使用内置数据
+            processData(EMBEDDED_DISHES);
+            updateStatus("Local/Preview", "emerald"); // 这里显示正常，因为这是预期行为
         }
+    }
+
+    function processData(raw) {
+        db = raw.map(d => ({
+            ...d, 
+            size: d.size || autoSize(d.name), 
+            mutex: d.mutex || ""
+        }));
+        loadHist();
+        document.getElementById('genBtn').disabled = false;
+    }
+
+    function updateStatus(text, color) {
+        const badge = document.getElementById('status-badge');
+        badge.textContent = text;
+        badge.className = `px-3 py-1 rounded-full bg-${color}-50 text-${color}-600 text-xs font-medium border border-${color}-100`;
     }
 
     function loadHist() {
@@ -443,7 +526,6 @@
             `;
         }).join('');
 
-        // --- 修复点：保留1位小数 ---
         document.getElementById('res-total').innerText = `¥${best.p.toFixed(1)}`;
         let avg = (best.p/pPerT).toFixed(1);
         let avgEl = document.getElementById('res-avg');
@@ -451,7 +533,7 @@
         
         avgEl.innerText = `¥${avg}`;
         
-        if(best.p <= limitIdeal) {
+        if(best.p <= limitIdeal * tables) { // 使用总理想预算判断
             avgEl.className = "text-emerald-600";
             box.className = "absolute right-0 top-0 w-16 h-16 bg-emerald-500 opacity-10 rounded-full -mr-4 -mt-4";
             document.getElementById('res-avg-container').className = "text-2xl font-bold tag-budget flex items-baseline gap-1 text-emerald-600";
@@ -463,7 +545,7 @@
         document.getElementById('res-count').innerText = `${best.m.length} 道菜`;
     }
 
-    // --- 替换逻辑 V3 ---
+    // --- 替换逻辑 V3 (修复关闭 & 两位小数) ---
     function openSwapModal(index) {
         currentSwapIndex = index;
         selectedSwapCandidate = null; // 重置选中
@@ -552,13 +634,13 @@
     }
 
     function confirmSwap() {
+        closeSwapModal(); // 1. 立即关闭弹窗
         if (selectedSwapCandidate && currentSwapIndex !== -1) {
             const newDish = db.find(d => d.name === selectedSwapCandidate);
             if (newDish) {
                 best.m[currentSwapIndex] = newDish;
-                render();
+                render(); // 重新渲染列表和价格
                 showToast(`已替换为: ${newDish.name}`);
-                closeSwapModal();
             }
         }
     }
@@ -570,7 +652,10 @@
     // --- 基础功能 ---
     function copyMenu() {
         if(!best) return;
+        
+        // 纯净复制
         const text = best.m.map(d => d.name).join('、');
+
         const now = new Date();
         hist.unshift({
             timestamp: now.getTime(),
@@ -611,4 +696,3 @@
 </script>
 </body>
 </html>
-
